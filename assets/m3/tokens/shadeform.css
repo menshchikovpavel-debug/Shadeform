@@ -1,0 +1,28 @@
+/* Shadeform — палитра редизайна (утверждена 05.10.2026)
+   База ахроматичная: бетон, бумага, камень, антрацит RAL 7016 (цвет самих пергол).
+   Цвет один — оранжевый, ~8% площади: кнопки, активные состояния, цифры.
+   Заменяет прежние M3-токены из seed #FF7821 с тёплым песком. */
+
+:root {
+  --brand: #F4581C;            /* Signal orange — единственный цвет */
+  --brand-hover: #C9420F;
+  --brand-ink: #141414;        /* текст на оранжевом */
+  --ink-hover: #2E3236;        /* ховер кнопок — антрацит */
+  --brand-container: #E3E2DF;
+  --on-brand-container: #141414;
+  --canvas: #E3E2DF;           /* Concrete — фон страницы */
+  --surface: #F4F4F2;          /* Paper — карточки, секции */
+  --surface-bright: #FAFAF9;
+  --surface-container: #EDEDEB;
+  --surface-container-high: #E3E2DF;
+  --surface-dark: #2E3236;     /* Anthracite RAL 7016 — тёмные секции */
+  --on-surface: #141414;       /* Ink */
+  --on-surface-variant: #55595C;
+  --on-surface-muted: #7A7D80;
+  --on-dark: #F4F4F2;
+  --on-dark-variant: #B9B8B4;  /* Stone */
+  --outline: #CFCECA;
+  --outline-strong: #2E3236;
+  --accent: #2E3236;
+  --accent-container: #E3E2DF;
+}

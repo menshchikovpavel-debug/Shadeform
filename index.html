@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Shadeform — Se stíněním vám pomáháme již více než 30 let</title>
+<meta name="description" content="Demoverze redesignu. Žaluzie, rolety, markýzy, pergoly a zimní zahrady. Showroom Praha.">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo/Favicon.svg">
+<link rel="stylesheet" href="assets/m3/fonts/inter-tight.css">
+<link rel="stylesheet" href="assets/m3/tokens/shadeform.css">
+<link rel="preload" as="image" href="assets/img/hero/3898_Hlinikova-pergola-Flatline-s-bezpecnostnim-sklem-RAL-7016-desktop.jpg">
+<style>
+/* ============================================================
+   SHADEFORM — demo
+   Tokens: assets/m3/tokens/shadeform.css (Material 3, seed #FF7821)
+
+   TYPE SYSTEM — five roles, nothing else
+     .display   ALL CAPS   hero
+     .title     ALL CAPS   section headings
+     .subtitle  ALL CAPS   eyebrows, card titles
+     .body      Sentence   running copy, navigation
+     .caption   Sentence   metadata
+
+   LAYOUT
+     Sections are full-bleed; content is inset by --pad (100px desktop).
+     Vertical padding = --pad + 20px. No vertical gap inside a section
+     may exceed --pad.
+   ============================================================ */
+
+:root{
+  --sans:'Inter Tight',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+
+  /* type */
+  --t-display:clamp(38px,5.2vw,76px);
+  --t-title:clamp(26px,3vw,44px);
+  --t-subtitle:clamp(15px,1.15vw,18px);
+  --t-body:clamp(15px,1.05vw,17px);
+  --t-caption:13px;
+
+  /* shape */
+  --r-card:16px;
+  --r-sec:40px;
+  --r-pill:999px;
+
+  /* layout */
+  --pad:clamp(20px,6vw,100px);
+  /* on very wide screens the content is capped, so the true edge is wider than
+     --pad. Header, sections and floating chrome all align to --edge. */
+  --edge:max(var(--pad),calc((100vw - var(--maxw)) / 2));
+  --pad-y:max(calc(var(--pad) + 20px),56px);
+  --gap:min(var(--pad),72px);
+  --maxw:1720px;
+  --overlap:56px;
+
+  /* motion */
+  --ease:cubic-bezier(.22,.7,.24,1);
+
+  /* header — driven by the section underneath */
+  --hdr-bg:transparent;
+  --hdr-ink:var(--surface);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+[id]{scroll-margin-top:100px}
+body{
+  margin:0;background:var(--canvas);color:var(--on-surface);
+  font-family:var(--sans);font-size:var(--t-body);font-weight:400;
+  line-height:1.55;letter-spacing:-.008em;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body.is-locked{overflow:hidden}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,h3,h4,p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:4px}
+.ico{width:1em;height:1em;fill:currentColor;flex:none;vertical-align:-.125em}
+
+/* ---------- the five type roles ---------- */
+.display{font-size:var(--t-display);font-weight:500;line-height:.96;letter-spacing:-.012em;text-transform:uppercase}
+.title{font-size:var(--t-title);font-weight:500;line-height:1.02;letter-spacing:-.008em;text-transform:uppercase}
+.subtitle{font-size:var(--t-subtitle);font-weight:500;line-height:1.2;letter-spacing:.075em;text-transform:uppercase}
+.body{font-size:var(--t-body);font-weight:400;line-height:1.55;letter-spacing:-.008em}
+.caption{font-size:var(--t-caption);font-weight:400;line-height:1.45;letter-spacing:.012em}
+.muted{color:var(--on-surface-variant)}
+.measure{max-width:46ch}
+.tr{text-align:right;margin-left:auto}
+
+/* ---------- buttons ----------
+   padding-inline = 1.6 × font-size · padding-block = 1 × font-size · full pill */
+.btn{
+  --fs:15px;
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:var(--fs);font-weight:500;line-height:1.15;letter-spacing:-.008em;
+  padding:var(--fs) calc(var(--fs) * 1.6);
+  border:1px solid transparent;border-radius:var(--r-pill);
+  transition:background .28s var(--ease),color .28s var(--ease),border-color .28s var(--ease);
+}
+.btn--sm{--fs:13px}
+.btn .ico{font-size:1.15em;transition:transform .3s var(--ease)}
+.btn:hover .ico{transform:translate(3px,-3px)}
+.btn--fill{background:var(--brand);color:var(--brand-ink)}
+.btn--line{border-color:currentColor}
+.btn--dark{background:var(--ink-hover);color:var(--brand)}
+/* one hover rule for the whole site: fill goes to dark ink, type goes orange */
+.btn--fill:hover,.btn--line:hover,.btn--onphoto:hover,.btn--ondark:hover{
+  background:var(--ink-hover);color:var(--brand);border-color:var(--ink-hover);
+}
+.btn--dark:hover{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn--onphoto{border-color:currentColor}
+.btn--ondark{border-color:rgba(244,244,242,.42)}
+
+/* ============================================================
+   HEADER — takes the colour of whatever section is beneath it
+   ============================================================ */
+.hdr{
+  position:fixed;inset:0 0 auto;z-index:60;
+  display:flex;align-items:center;gap:clamp(12px,1.6vw,28px);
+  padding:14px var(--edge);
+  background:var(--hdr-bg);color:var(--hdr-ink);
+  transition:background .45s var(--ease),color .45s var(--ease),padding .3s var(--ease);
+}
+.hdr__logo{display:block;flex:none;width:clamp(112px,8.4vw,142px);color:currentColor}
+.hdr__logo svg{width:100%;height:auto;display:block;fill:currentColor}
+/* even spacing between the logo and the CTA */
+.nav{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:clamp(12px,1.5vw,26px);min-width:0}
+.nav__item{position:relative}
+.nav__link{
+  display:inline-flex;align-items:center;gap:5px;padding:12px 2px;
+  font-size:var(--t-body);font-weight:400;letter-spacing:-.008em;white-space:nowrap;
+  opacity:.9;transition:opacity .2s var(--ease);
+}
+.nav__link:hover{opacity:1}
+.nav__link .ico{font-size:1.1em;transition:transform .25s var(--ease)}
+.nav__item:hover .nav__link .ico{transform:rotate(180deg)}
+.hdr .btn{flex:none}
+/* an orange button on an orange band is invisible — invert it there */
+.hdr[data-theme="photo"]{text-shadow:0 1px 16px rgba(20,20,20,.5)}
+.hdr[data-theme="photo"] .btn{text-shadow:none}
+.hdr[data-theme="brand"] .btn--fill{background:var(--ink-hover);color:var(--brand)}
+.hdr[data-theme="brand"] .btn--fill:hover{background:var(--brand-ink);color:var(--brand)}
+
+/* mega dropdown with a preview that slides out under the hovered row */
+.mega{
+  position:absolute;top:calc(100% + 8px);left:-14px;transform:translateY(-8px);
+  width:330px;padding:12px;border-radius:var(--r-card);
+  background:var(--surface);color:var(--on-surface);
+  border:1px solid var(--outline);box-shadow:0 26px 64px rgba(20,20,20,.2);
+  opacity:0;visibility:hidden;
+  transition:opacity .22s var(--ease),transform .22s var(--ease),visibility .22s;
+}
+.nav__item:hover .mega,.nav__item:focus-within .mega{opacity:1;visibility:visible;transform:translateY(0)}
+.mega a{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:9px 12px;border-radius:10px;font-size:15px;
+  transition:background .18s var(--ease),color .18s var(--ease);
+}
+.mega a:hover{background:var(--brand-container);color:var(--brand-ink)}
+.mega a .ico{font-size:16px;opacity:0;transition:opacity .18s var(--ease)}
+.mega a:hover .ico{opacity:1}
+.nav__item:nth-last-child(1) .mega,.nav__item:nth-last-child(2) .mega{left:auto;right:-14px}
+.mega__prev{
+  position:relative;margin-top:0;height:0;border-radius:var(--r-card);overflow:hidden;
+  transition:height .4s var(--ease),margin-top .4s var(--ease);
+}
+.mega.is-preview .mega__prev{height:176px;margin-top:10px}
+.mega__prev img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .35s var(--ease);
+}
+.mega__prev img.is-on{opacity:1}
+
+.burger{display:none;margin-left:auto;padding:6px;border-radius:10px}
+.burger .ico{font-size:28px}
+
+/* ============================================================
+   HERO — carousel of untouched photographs, no overlay at all.
+   Ink per slide comes from measuring each image (see README).
+   ============================================================ */
+.hero{
+  position:relative;height:100svh;min-height:600px;width:100%;overflow:hidden;
+  background:var(--surface-dark);
+  /* without this the scrims (z-index 1) escape into the root stacking context and
+     paint over the section that overlaps the hero */
+  isolation:isolate;
+}
+.hero__slide{position:absolute;inset:0;opacity:0;transition:opacity 1.1s var(--ease)}
+.hero__slide.is-on{opacity:1}
+.hero__slide img{width:100%;height:100%;object-fit:cover;object-position:center 56%}
+.hero::before,.hero::after{content:"";position:absolute;left:0;right:0;z-index:1;pointer-events:none}
+.hero::before{top:0;height:18%;background:linear-gradient(180deg,rgba(20,20,20,.66),rgba(20,20,20,0))}
+.hero::after{
+  bottom:0;height:44%;
+  /* peaks where the copy sits, then eases back off so the strip behind the next
+     section's rounded corners is almost clean photograph — no hard edge */
+  background:linear-gradient(180deg,
+    rgba(20,20,20,0) 0%,
+    rgba(20,20,20,.30) 36%,
+    rgba(20,20,20,.62) 62%,
+    rgba(20,20,20,.50) 80%,
+    rgba(20,20,20,.10) 93%,
+    rgba(20,20,20,0) 100%);
+}
+.hero__copy{
+  position:absolute;left:var(--edge);bottom:calc(var(--overlap) + clamp(58px,6vw,104px));
+  max-width:min(46ch,62vw);z-index:3;
+  color:var(--hero-ink,var(--surface));
+}
+.hero__cap{opacity:0;transform:translateY(10px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.hero__ttl{margin-top:10px;opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease) .08s,transform .7s var(--ease) .08s}
+.hero.is-ready .hero__cap,.hero.is-ready .hero__ttl{opacity:1;transform:none}
+/* slide indicator — thin bars, like Stykka */
+.hero__dots{
+  position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(var(--overlap) + 26px);z-index:3;
+  display:flex;gap:8px;
+}
+.hero__dot{
+  width:38px;height:3px;border-radius:3px;position:relative;overflow:hidden;
+  background:currentColor;opacity:.34;color:var(--hero-ink,var(--surface));
+  transition:opacity .3s var(--ease);
+}
+.hero__dot.is-on{opacity:1}
+.hero__dot i{position:absolute;inset:0;background:currentColor;transform:scaleX(0);transform-origin:left}
+.hero__dot.is-on i{animation:fill var(--dur,6.5s) linear forwards}
+@keyframes fill{to{transform:scaleX(1)}}
+
+/* ============================================================
+   SECTIONS — full-bleed, content inset by --pad, stacked with 40px
+   corners so each one rides over the previous
+   ============================================================ */
+.sec{
+  position:relative;width:100%;
+  border-radius:var(--r-sec);
+  padding:var(--pad-y) var(--edge) calc(var(--pad-y) + var(--overlap));
+  margin-top:calc(var(--overlap) * -1);
+  background:var(--surface);
+}
+.sec__in{max-width:var(--maxw);margin-inline:auto}
+.sec--tint{background:var(--surface-container)}
+.sec--brand{background:var(--brand);color:var(--brand-ink)}
+.sec--brand .muted{color:rgba(20,20,20,.72)}
+.sec--dark{background:var(--surface-dark);color:var(--on-dark)}
+.sec--dark .muted{color:var(--on-dark-variant)}
+
+.sec__head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:24px clamp(28px,4vw,72px);margin-bottom:var(--gap)}
+.sec__head-l{flex:1 1 min(560px,100%)}
+.sec__head-r{flex:0 1 min(400px,100%);margin-left:auto}
+.sec__eyebrow{color:var(--brand);margin-bottom:14px;display:block}
+.sec--brand .sec__eyebrow{color:rgba(20,20,20,.6)}
+.sec--dark .sec__eyebrow{color:var(--brand)}
+
+/* ============================================================
+   PRODUCT CARDS — six asymmetric panels.
+   Resting: number, arrow, title. Hover: +40% width, body right,
+   tags left, bottom scrim.
+   ============================================================ */
+.prod{display:flex;flex-direction:column;gap:14px}
+.prod__row{display:flex;gap:14px}
+.prod__item{
+  --g:1;
+  position:relative;flex:var(--g) 1 0;min-width:0;
+  min-height:clamp(300px,38vh,460px);
+  border-radius:var(--r-card);overflow:hidden;isolation:isolate;
+  background:var(--surface-container-high);
+  transition:flex-grow .55s var(--ease);
+}
+.prod__row:hover .prod__item{flex-grow:calc(var(--g) * .86)}
+.prod__row .prod__item:hover{flex-grow:calc(var(--g) * 1.4)}
+.prod__item img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
+  transition:transform .9s var(--ease);
+}
+.prod__item:hover img{transform:scale(1.04)}
+/* top scrim is always on — it only has to carry the number and the arrow */
+.prod__item::before{
+  content:"";position:absolute;inset:0 0 auto;height:32%;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(20,20,20,.5),rgba(20,20,20,0));
+}
+/* bottom scrim arrives with the copy */
+.prod__item::after{
+  content:"";position:absolute;inset:auto 0 0;height:70%;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(20,20,20,0) 0%,rgba(20,20,20,.55) 45%,rgba(20,20,20,.88) 100%);
+  opacity:0;transition:opacity .45s var(--ease);
+}
+.prod__item:hover::after,.prod__item.is-open::after{opacity:1}
+.prod__body{
+  position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
+  padding:clamp(18px,1.7vw,26px);color:var(--surface);
+}
+.prod__top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.prod__n{opacity:.8;letter-spacing:.16em}
+.prod__arrow{
+  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none;
+  border:1px solid rgba(244,244,242,.5);
+  transition:background .25s var(--ease),color .25s var(--ease),border-color .25s var(--ease);
+}
+.prod__arrow .ico{font-size:19px}
+.prod__item:hover .prod__arrow{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.prod__foot{margin-top:auto;display:flex;align-items:flex-end;gap:20px}
+.prod__l{flex:1 1 auto;min-width:0}
+.prod__r{
+  flex:0 1 44%;text-align:right;color:rgba(244,244,242,.9);
+  opacity:0;transform:translateY(12px);
+  transition:opacity .4s var(--ease) .06s,transform .4s var(--ease) .06s;
+}
+.prod__item:hover .prod__r,.prod__item.is-open .prod__r{opacity:1;transform:none}
+.prod__ttl{font-size:clamp(20px,1.75vw,29px);font-weight:500;line-height:1.02;letter-spacing:-.008em;text-transform:uppercase;text-shadow:0 2px 22px rgba(20,20,20,.55)}
+.prod__tags{
+  display:flex;flex-wrap:wrap;gap:7px;margin-top:0;
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .45s var(--ease),opacity .35s var(--ease),margin-top .45s var(--ease);
+}
+.prod__item:hover .prod__tags,.prod__item.is-open .prod__tags{max-height:120px;opacity:1;margin-top:14px}
+.prod__tags a{
+  padding:7px 13px;border-radius:var(--r-pill);font-size:13px;white-space:nowrap;
+  border:1px solid rgba(244,244,242,.55);
+  transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease);
+}
+.prod__tags a:hover{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+
+/* ============================================================
+   STATS
+   ============================================================ */
+.stats{display:flex;flex-wrap:wrap;gap:clamp(24px,4vw,64px)}
+.stat{flex:1 1 240px;border-top:1px solid rgba(244,244,242,.18);padding-top:18px}
+.stat__n{font-size:clamp(52px,7.2vw,116px);font-weight:500;line-height:.86;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.stat__t{margin-top:16px;color:var(--on-dark-variant);white-space:nowrap}
+.stat__n::after{content:".";color:var(--brand)}
+
+/* ============================================================
+   EXTERIOR / INTERIOR — two square cards, nothing else
+   ============================================================ */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.split__card{position:relative;aspect-ratio:1;border-radius:var(--r-card);overflow:hidden;isolation:isolate}
+.split__card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform 1s var(--ease)}
+.split__card:hover img{transform:scale(1.05)}
+.split__card::after{
+  content:"";position:absolute;inset:auto 0 0;height:62%;z-index:1;
+  background:linear-gradient(180deg,rgba(20,20,20,0),rgba(20,20,20,.86));
+}
+.split__body{
+  position:relative;z-index:2;height:100%;display:flex;align-items:flex-end;
+  justify-content:space-between;gap:clamp(18px,2vw,36px);
+  padding:clamp(20px,2.2vw,40px);color:var(--surface);
+}
+.split__l{flex:1 1 auto;min-width:0}
+.split__l p{margin-top:12px;max-width:38ch;color:rgba(244,244,242,.85)}
+.split__r{flex:none}
+
+/* ============================================================
+   REALIZACE — instagram-style stories
+   ============================================================ */
+.stories{
+  display:flex;gap:clamp(16px,2vw,30px);overflow-x:auto;
+  margin-inline:calc(var(--edge) * -1);padding:4px var(--edge) 8px;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.stories::-webkit-scrollbar{display:none}
+.story{flex:0 0 auto;width:clamp(88px,9.4vw,138px);cursor:pointer}
+.story__ring{
+  width:100%;aspect-ratio:1;border-radius:50%;padding:3px;
+  background:conic-gradient(from 200deg,var(--brand),#ffc39c,var(--brand-hover),var(--brand));
+  transition:transform .3s var(--ease);
+}
+.story:hover .story__ring{transform:scale(1.04)}
+.story__ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid var(--surface)}
+.sec--tint .story__ring img{border-color:var(--surface-container)}
+.story__t{margin-top:11px;text-align:left;color:var(--on-surface-variant)}
+
+.sv{position:fixed;inset:0;z-index:92;display:grid;place-items:center;padding:20px;
+  background:rgba(20,20,20,.94);opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility .3s}
+.sv.is-open{opacity:1;visibility:visible}
+.sv__box{position:relative;width:min(430px,94vw);aspect-ratio:9/16;max-height:92vh;border-radius:24px;overflow:hidden;background:#0e0f10}
+.sv__box img{width:100%;height:100%;object-fit:cover}
+.sv__bars{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;gap:5px}
+.sv__bar{flex:1;height:3px;border-radius:2px;background:rgba(244,244,242,.32);overflow:hidden}
+.sv__bar i{display:block;height:100%;background:var(--surface);transform:scaleX(0);transform-origin:left}
+.sv__bar.is-done i{transform:scaleX(1)}
+.sv__bar.is-on i{animation:fill 5s linear forwards}
+.sv__zones{position:absolute;inset:0;z-index:3;display:flex}
+.sv__zones button{flex:1;cursor:pointer}
+.sv__cap{position:absolute;left:22px;right:22px;bottom:26px;z-index:4;color:var(--surface);text-shadow:0 2px 22px rgba(20,20,20,.7)}
+.sv__x{position:absolute;top:24px;right:28px;z-index:23;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--surface);background:rgba(20,20,20,.4)}
+.sv__x .ico{font-size:22px}
+
+/* ============================================================
+   REVIEWS — a rail that runs past the section edge
+   ============================================================ */
+.revs{
+  display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x proximity;
+  scroll-padding-inline-start:var(--edge);
+  margin-inline:calc(var(--edge) * -1);padding:4px 0 10px;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.revs::before,.revs::after{content:"";flex:0 0 calc(var(--edge) - 14px);align-self:stretch}
+.revs::-webkit-scrollbar{display:none}
+.rev{
+  flex:0 0 min(380px,80vw);scroll-snap-align:start;display:flex;flex-direction:column;
+  padding:clamp(20px,2vw,30px);border-radius:var(--r-card);
+  border:1px solid rgba(244,244,242,.18);background:rgba(244,244,242,.04);
+}
+.rev__stars{display:flex;gap:3px;color:var(--brand);font-size:16px;margin-bottom:15px}
+.rev p{color:var(--on-dark-variant)}
+.rev__who{margin-top:auto;padding-top:22px;color:var(--on-dark)}
+.rev__who span{display:block;color:var(--on-dark-variant);margin-top:3px}
+.rev--cta{
+  align-items:flex-start;justify-content:center;gap:18px;
+  border-style:dashed;border-color:rgba(244,244,242,.3);background:none;
+  flex-basis:min(300px,72vw);
+}
+
+/* ============================================================
+   NEWS
+   ============================================================ */
+.news{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.post{
+  display:flex;flex-direction:column;gap:14px;padding:clamp(20px,2vw,32px);
+  border:1px solid var(--outline);border-radius:var(--r-card);background:var(--surface-bright);
+  transition:border-color .25s var(--ease),transform .35s var(--ease);
+}
+.post:hover{border-color:var(--brand);transform:translateY(-3px)}
+.post__date{color:var(--brand);letter-spacing:.09em;text-transform:uppercase}
+.post p{color:var(--on-surface-variant)}
+.post__go{display:inline-flex;align-items:center;gap:8px;margin-top:auto;font-weight:500}
+.post__go .ico{font-size:18px;transition:transform .25s var(--ease)}
+.post:hover .post__go .ico{transform:translate(3px,-3px)}
+
+/* ============================================================
+   SHOWROOM — dark form card on the brand field
+   ============================================================ */
+.show{display:flex;flex-wrap:wrap;gap:clamp(28px,4vw,72px)}
+.show__l{flex:1 1 min(420px,100%)}
+.show__r{flex:1 1 min(400px,100%)}
+.info{margin-top:clamp(26px,3vw,40px);display:flex;flex-direction:column;gap:18px}
+.info__row{display:flex;gap:14px;align-items:flex-start}
+.info__row .ico{font-size:21px;margin-top:3px;opacity:.72}
+.form{background:var(--surface-dark);color:var(--on-dark);border-radius:var(--r-card);padding:clamp(22px,2.4vw,38px)}
+.form__grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 12px;margin-top:26px}
+.field{position:relative}
+.field--full{grid-column:1 / -1}
+.field label{
+  position:absolute;top:0;left:15px;transform:translateY(-50%);
+  padding:0 7px;background:var(--surface-dark);color:var(--on-dark-variant);
+  font-size:var(--t-caption);letter-spacing:.012em;pointer-events:none;
+  transition:color .2s var(--ease);
+}
+.field input,.field select,.field textarea{
+  width:100%;font:inherit;font-size:15.5px;color:var(--on-dark);
+  background:transparent;border:1px solid rgba(244,244,242,.3);
+  border-radius:var(--r-card);padding:17px 16px;
+  transition:border-color .2s var(--ease);
+}
+.field textarea{resize:vertical}
+.field select{appearance:none;background-image:none}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand)}
+.field:focus-within label{color:var(--brand)}
+.field__chev{position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.6;font-size:20px}
+.form__note{margin-top:14px;color:var(--on-dark-variant)}
+.form .btn{margin-top:20px;width:100%;justify-content:center}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.foot{
+  background:var(--surface-dark);color:var(--on-dark);
+  border-radius:var(--r-sec) var(--r-sec) 0 0;
+  margin-top:calc(var(--overlap) * -1);position:relative;
+  padding:calc(var(--pad-y) + var(--overlap)) var(--edge) clamp(30px,4vw,64px);
+}
+.foot__top{display:flex;flex-wrap:wrap;gap:clamp(28px,4vw,72px);padding-bottom:44px}
+.foot__brand{flex:1 1 min(300px,100%)}
+.foot__brand .hdr__logo{width:148px;color:var(--brand)}
+.foot__brand p{margin-top:20px;max-width:34ch;color:var(--on-dark-variant)}
+.foot__cols{flex:2 1 min(420px,100%);display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.foot__col h4{color:var(--brand);margin-bottom:16px}
+.foot__col li{margin-bottom:9px}
+.foot__col a{color:var(--on-dark-variant);transition:color .2s var(--ease)}
+.foot__col a:hover{color:var(--brand)}
+.foot__bot{display:flex;flex-wrap:wrap;gap:12px 26px;align-items:center;padding-top:26px;border-top:1px solid rgba(244,244,242,.14);color:var(--on-dark-variant)}
+.foot__credit{margin-left:auto}
+.foot__credit b{color:var(--on-dark);font-weight:600}
+.foot__credit a{text-decoration:underline;text-underline-offset:3px}
+.somfy{display:flex;align-items:center;gap:12px;margin-top:24px;color:var(--on-dark-variant)}
+.somfy img{height:22px;width:auto;opacity:.75;filter:grayscale(1) brightness(1.7)}
+
+/* ============================================================
+   MOBILE MENU / DEMO LOCK / FLOATING CHROME
+   ============================================================ */
+.mm{position:fixed;inset:0;z-index:80;background:var(--surface);padding:14px var(--edge) 40px;overflow-y:auto;transform:translateY(-100%);transition:transform .45s var(--ease)}
+.mm.is-open{transform:none}
+.mm__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+.mm__top .hdr__logo{color:var(--brand)}
+.mm__close{padding:6px}
+.mm__close .ico{font-size:30px}
+.mm__grp{border-bottom:1px solid var(--outline)}
+.mm__grp>button,.mm__grp>a{width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 0;font-size:19px;font-weight:500;letter-spacing:-.015em;text-transform:uppercase}
+.mm__grp>button .ico{font-size:22px;transition:transform .3s var(--ease)}
+.mm__grp.is-open>button .ico{transform:rotate(180deg)}
+.mm__subs{max-height:0;overflow:hidden;transition:max-height .4s var(--ease)}
+.mm__grp.is-open .mm__subs{max-height:460px}
+.mm__subs a{display:block;padding:10px 0 10px 14px;color:var(--on-surface-variant)}
+.mm__foot{display:flex;flex-direction:column;gap:10px;margin-top:26px}
+
+.lock{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:24px;background:rgba(20,20,20,.62);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility .3s}
+.lock.is-open{opacity:1;visibility:visible}
+.lock__card{width:min(560px,100%);background:var(--surface);border-radius:var(--r-sec);padding:clamp(28px,4vw,52px);transform:translateY(14px);transition:transform .4s var(--ease)}
+.lock.is-open .lock__card{transform:none}
+.lock__badge{display:inline-block;padding:6px 14px;border-radius:var(--r-pill);background:var(--brand);color:var(--brand-ink);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.lock__crumb{margin-top:20px;color:var(--on-surface-muted);letter-spacing:.09em;text-transform:uppercase}
+.lock h2{margin-top:10px}
+.lock p{margin-top:16px;color:var(--on-surface-variant);max-width:44ch}
+.lock .btn{margin-top:26px}
+
+/* AURIFER now lives bottom-LEFT, the chat bubble takes bottom-right */
+.plaque{
+  position:fixed;left:var(--edge);bottom:clamp(14px,2vw,26px);z-index:70;
+  display:flex;align-items:center;gap:12px;
+  padding:12px 12px 12px 18px;border-radius:var(--r-pill);
+  background:var(--brand);color:var(--brand-ink);font-size:14.5px;font-weight:500;
+  box-shadow:0 12px 34px rgba(20,20,20,.26);
+  animation:pop .6s var(--ease) both 1s;
+}
+@keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.plaque.is-hidden{display:none}
+.plaque a{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.plaque__x{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;transition:background .2s var(--ease)}
+.plaque__x:hover{background:rgba(20,20,20,.16)}
+.plaque__x .ico{font-size:18px}
+
+.chat{position:fixed;right:var(--edge);bottom:clamp(14px,2vw,26px);z-index:71;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.chat__card{
+  width:min(320px,calc(100vw - 32px));padding:22px;border-radius:var(--r-card);
+  background:var(--surface-dark);color:var(--on-dark);
+  box-shadow:0 18px 48px rgba(20,20,20,.32);
+  transform-origin:100% 100%;
+  opacity:0;visibility:hidden;transform:translateY(10px) scale(.96);
+  transition:opacity .3s var(--ease),transform .3s var(--ease),visibility .3s;
+}
+.chat.is-open .chat__card{opacity:1;visibility:visible;transform:none}
+.chat__card p{margin-top:10px;color:var(--on-dark-variant)}
+.chat__card .btn{margin-top:18px}
+.chat__btn{
+  display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:var(--r-pill);
+  background:var(--surface-dark);color:var(--on-dark);font-weight:500;
+  box-shadow:0 12px 34px rgba(20,20,20,.3);
+  animation:pop .6s var(--ease) both 1.3s;
+}
+.chat__btn .ico{font-size:20px;color:var(--brand)}
+.chat.is-open .chat__btn .ico--q{display:none}
+.chat__btn .ico--x{display:none}
+.chat.is-open .chat__btn .ico--x{display:inline-block}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,24px);z-index:95;padding:14px 22px;border-radius:var(--r-pill);background:var(--surface-dark);color:var(--on-dark);opacity:0;visibility:hidden;transition:all .35s var(--ease)}
+.toast.is-open{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+
+/* ---------- stories rail: arrows + subtitle captions ---------- */
+.stories__wrap{position:relative}
+.stories__nav{
+  position:absolute;top:clamp(44px,4.7vw,69px);transform:translateY(-50%);z-index:4;
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface-bright);border:1px solid var(--outline);color:var(--on-surface);
+  box-shadow:0 10px 26px rgba(20,20,20,.16);
+  transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),opacity .2s var(--ease);
+}
+.stories__nav:hover{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.stories__nav[disabled]{opacity:0;pointer-events:none}
+.stories__nav .ico{font-size:24px}
+.stories__nav--prev{left:-14px}
+.stories__nav--next{right:-14px}
+.story__t{font-size:clamp(11.5px,.82vw,13px)}
+.stories__foot{display:flex;justify-content:flex-start;margin-top:clamp(22px,2.4vw,36px)}
+
+/* ---------- story viewer: instagram-style drum ---------- */
+.sv__stage{position:relative;width:100%;height:min(84vh,840px);display:flex;align-items:center;justify-content:center}
+.sv__card{
+  position:absolute;width:min(360px,56vw);aspect-ratio:9/16;
+  border-radius:18px;overflow:hidden;background:#0e0f10;
+  transition:transform .5s var(--ease),opacity .45s var(--ease),filter .45s var(--ease);
+}
+.sv__card img{width:100%;height:100%;object-fit:cover}
+.sv__card.is-side{cursor:pointer;filter:brightness(.52)}
+.sv__card.is-side:hover{filter:brightness(.72)}
+.sv__hud{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(360px,56vw);aspect-ratio:9/16;z-index:20;pointer-events:none;
+  border-radius:18px;overflow:hidden;
+}
+.sv__hud::before,.sv__hud::after{content:"";position:absolute;left:0;right:0}
+.sv__hud::before{top:0;height:20%;background:linear-gradient(180deg,rgba(20,20,20,.62),rgba(20,20,20,0))}
+.sv__hud::after{bottom:0;height:28%;background:linear-gradient(180deg,rgba(20,20,20,0),rgba(20,20,20,.72))}
+.sv__arrow{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:22;
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(244,244,242,.14);color:var(--surface);
+  transition:background .2s var(--ease)
+}
+.sv__arrow:hover{background:rgba(244,244,242,.28)}
+.sv__arrow .ico{font-size:24px}
+.sv__arrow--prev{left:calc(50% - min(360px,56vw)/2 - 62px)}
+.sv__arrow--next{right:calc(50% - min(360px,56vw)/2 - 62px)}
+
+/* ---------- review cards ---------- */
+.rev__head{display:flex;align-items:flex-start;gap:14px}
+.rev__ava{
+  width:48px;height:48px;border-radius:12px;flex:none;display:grid;place-items:center;
+  background:rgba(244,244,242,.09);color:var(--on-dark-variant);
+}
+.rev__ava .ico{font-size:26px}
+.rev__name{color:var(--on-dark);font-weight:500}
+.rev__stars{display:flex;gap:2px;color:var(--brand);font-size:15px;margin-top:5px}
+.rev__stars .off{color:var(--on-dark-variant);opacity:.4}
+.rev__txt{
+  margin-top:18px;color:var(--on-dark-variant);
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+}
+.rev.is-full .rev__txt{-webkit-line-clamp:unset;display:block}
+.rev__more{margin-top:6px;color:var(--on-dark);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.rev.is-full .rev__more{display:none}
+.rev .rev__svc{margin-top:auto;padding-top:18px;color:var(--brand)}
+.rev .btn{margin-top:14px;width:100%;justify-content:center}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:1240px){
+  .nav{display:none}
+  .burger{display:block}
+  .hdr .btn{display:none}
+}
+@media (max-width:900px){
+  :root{--overlap:36px;--r-sec:28px;--pad-y:40px}
+  .prod__row{flex-direction:column}
+  .prod__item,.prod__row:hover .prod__item,.prod__row .prod__item:hover{flex-grow:1}
+  .prod__item{min-height:230px}
+  .prod__item.is-open{min-height:340px}
+  .prod__foot{flex-direction:column;align-items:flex-start;gap:12px}
+  .prod__r{flex:1 1 auto;text-align:left;max-width:100%}
+  .split{grid-template-columns:1fr}
+  .split__body{flex-direction:column;align-items:flex-start;gap:18px}
+  .news{grid-template-columns:1fr}
+  .form__grid{grid-template-columns:1fr}
+  .foot__cols{grid-template-columns:repeat(2,1fr)}
+  .stat__t{white-space:normal}
+  .hero__copy{max-width:none;right:var(--edge)}
+  .stories__nav{display:none}
+  .sv__arrow--prev{left:8px}
+  .sv__arrow--next{right:8px}
+  .sv__card{width:min(360px,76vw)}
+  .sv__hud{width:min(360px,76vw)}
+}
+@media (max-width:560px){
+  .foot__cols{grid-template-columns:1fr}
+  .plaque{padding:9px 9px 9px 14px;font-size:13px;gap:8px}
+  .plaque span span{display:none}
+  .chat__btn span{display:none}
+  .chat__btn{padding:14px;border-radius:50%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="i-arrow-outward" viewBox="0 -960 960 960"><path d="m256-240-56-56 384-384H240v-80h480v480h-80v-344L256-240Z"/></symbol>
+<symbol id="i-arrow-forward" viewBox="0 -960 960 960"><path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/></symbol>
+<symbol id="i-close" viewBox="0 -960 960 960"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></symbol>
+<symbol id="i-menu" viewBox="0 -960 960 960"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></symbol>
+<symbol id="i-expand-more" viewBox="0 -960 960 960"><path d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z"/></symbol>
+<symbol id="i-chevron-right" viewBox="0 -960 960 960"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></symbol>
+<symbol id="i-location-on" viewBox="0 -960 960 960"><path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/></symbol>
+<symbol id="i-call" viewBox="0 -960 960 960"><path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z"/></symbol>
+<symbol id="i-mail" viewBox="0 -960 960 960"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z"/></symbol>
+<symbol id="i-schedule" viewBox="0 -960 960 960"><path d="m612-292 56-56-148-148v-184h-80v216l172 172ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q133 0 226.5-93.5T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160Z"/></symbol>
+<symbol id="i-star" viewBox="0 -960 960 960"><path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z"/></symbol>
+<symbol id="i-sunny" viewBox="0 -960 960 960"><path d="M440-760v-160h80v160h-80Zm266 110-55-55 112-115 56 57-113 113Zm54 210v-80h160v80H760ZM440-40v-160h80v160h-80ZM254-652 140-763l57-56 113 113-56 54Zm508 512L651-255l54-54 114 110-57 59ZM40-440v-80h160v80H40Zm157 300-56-57 112-112 29 27 29 28-114 114Zm113-170q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Zm283-57q47-47 47-113t-47-113q-47-47-113-47t-113 47q-47 47-47 113t47 113q47 47 113 47t113-47ZM480-480Z"/></symbol>
+<symbol id="i-shield" viewBox="0 -960 960 960"><path d="M480-80q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-84q104-33 172-132t68-220v-189l-240-90-240 90v189q0 121 68 220t172 132Zm0-316Z"/></symbol>
+<symbol id="i-handyman" viewBox="0 -960 960 960"><path d="M739-83.5q-7-2.5-13-8.5L522-296q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l85-85q6-6 13-8.5t15-2.5q8 0 15 2.5t13 8.5l204 204q6 6 8.5 13t2.5 15q0 8-2.5 15t-8.5 13l-85 85q-6 6-13 8.5T754-81q-8 0-15-2.5Zm15-92.5 29-29-147-147-29 29 147 147ZM189.5-83q-7.5-3-13.5-9l-84-84q-6-6-9-13.5T80-205q0-8 3-15t9-13l212-212h85l34-34-165-165h-57L80-765l113-113 121 121v57l165 165 116-116-43-43 56-56H495l-28-28 142-142 28 28v113l56-56 142 142q17 17 26 38.5t9 45.5q0 24-9 46t-26 39l-85-85-56 56-42-42-207 207v84L233-92q-6 6-13 9t-15 3q-8 0-15.5-3Zm15.5-93 170-170v-29h-29L176-205l29 29Zm0 0-29-29 15 14 14 15Zm549 0 29-29-29 29Z"/></symbol>
+<symbol id="i-straighten" viewBox="0 -960 960 960"><path d="M160-240q-33 0-56.5-23.5T80-320v-320q0-33 23.5-56.5T160-720h640q33 0 56.5 23.5T880-640v320q0 33-23.5 56.5T800-240H160Zm0-80h640v-320H680v160h-80v-160h-80v160h-80v-160h-80v160h-80v-160H160v320Zm120-160h80-80Zm160 0h80-80Zm160 0h80-80Zm-120 0Z"/></symbol>
+<symbol id="i-verified" viewBox="0 -960 960 960"><path d="m344-60-76-128-144-32 14-148-98-112 98-112-14-148 144-32 76-128 136 58 136-58 76 128 144 32-14 148 98 112-98 112 14 148-144 32-76 128-136-58-136 58Zm34-102 102-44 104 44 56-96 110-26-10-112 74-84-74-86 10-112-110-24-58-96-102 44-104-44-56 96-110 24 10 112-74 86 74 84-10 114 110 24 58 96Zm102-318Zm-42 142 226-226-56-58-170 170-86-84-56 56 142 142Z"/></symbol>
+<symbol id="i-south" viewBox="0 -960 960 960"><path d="M480-80 200-360l56-56 184 183v-647h80v647l184-184 56 57L480-80Z"/></symbol>
+<symbol id="i-format-quote" viewBox="0 -960 960 960"><path d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92ZM362.5-517.5Q380-535 380-560t-17.5-42.5Q345-620 320-620t-42.5 17.5Q260-585 260-560t17.5 42.5Q295-500 320-500t42.5-17.5Zm360 0Q740-535 740-560t-17.5-42.5Q705-620 680-620t-42.5 17.5Q620-585 620-560t17.5 42.5Q655-500 680-500t42.5-17.5ZM680-560Zm-360 0Z"/></symbol>
+<symbol id="i-add" viewBox="0 -960 960 960"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></symbol>
+<symbol id="i-remove" viewBox="0 -960 960 960"><path d="M200-440v-80h560v80H200Z"/></symbol>
+<symbol id="i-photo-library" viewBox="0 -960 960 960"><path d="M360-400h400L622-580l-92 120-62-80-108 140Zm-40 160q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/></symbol>
+<symbol id="i-star-fill" viewBox="0 -960 960 960"><path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/></symbol>
+<symbol id="i-forum" viewBox="0 -960 960 960"><path d="M880-80 720-240H320q-33 0-56.5-23.5T240-320v-40h440q33 0 56.5-23.5T760-440v-280h40q33 0 56.5 23.5T880-640v560ZM160-473l47-47h393v-280H160v327ZM80-280v-520q0-33 23.5-56.5T160-880h440q33 0 56.5 23.5T680-800v280q0 33-23.5 56.5T600-440H240L80-280Zm80-240v-280 280Z"/></symbol>
+<symbol id="i-chevron-left" viewBox="0 -960 960 960"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></symbol>
+<symbol id="i-person" viewBox="0 -960 960 960"><path d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z"/></symbol>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><symbol id="logo" viewBox="0 0 437.5948 81.0391"><g> <g> <path d="M133.9815,67.0078c-3.3896,0-6.333-0.5576-8.8301-1.6719c-2.4971-1.1152-4.459-2.6758-5.8857-4.6826 c-1.4277-2.0068-2.2295-4.3252-2.4082-6.9561h4.6484c0.1787,1.9844,0.8311,3.6562,1.957,5.0166s2.6025,2.3906,4.4316,3.0938 c1.8281,0.7021,3.8564,1.0527,6.0869,1.0527c2.4971,0,4.7158-0.418,6.6553-1.2539c1.9404-0.8359,3.4619-2.001,4.5654-3.4951 c1.1035-1.4932,1.6553-3.2441,1.6553-5.251c0-1.6934-0.4404-3.1104-1.3213-4.2471s-2.1016-2.0957-3.6621-2.876 s-3.3779-1.4717-5.4512-2.0732l-5.9199-1.7393c-3.9023-1.1377-6.9346-2.7432-9.0967-4.8164 c-2.1631-2.0732-3.2441-4.7041-3.2441-7.8926c0-2.6758,0.7188-5.0342,2.1572-7.0742c1.4375-2.04,3.3828-3.6338,5.8359-4.7822 c2.4521-1.1484,5.2061-1.7227,8.2607-1.7227c3.0986,0,5.8418,0.5742,8.2275,1.7227s4.2812,2.709,5.6855,4.6816 c1.4053,1.9736,2.1621,4.2197,2.2744,6.7393h-4.4482c-0.2676-2.7637-1.4834-4.9658-3.6455-6.6055 c-2.1631-1.6387-4.9053-2.458-8.2275-2.458c-2.2969,0-4.3262,0.4014-6.0869,1.2041c-1.7617,0.8027-3.1387,1.9062-4.1309,3.3115 c-0.9922,1.4043-1.4883,2.999-1.4883,4.7822c0,1.7393,0.4902,3.1943,1.4717,4.3643c0.9814,1.1709,2.2295,2.124,3.7461,2.8604 c1.5156,0.7354,3.0771,1.3486,4.6826,1.8389l5.251,1.5049c1.582,0.4688,3.165,1.043,4.749,1.7227 c1.583,0.6807,3.0371,1.5332,4.3643,2.5586c1.3262,1.0254,2.3965,2.2803,3.2109,3.7627c0.8135,1.4824,1.2207,3.2607,1.2207,5.334 c0,2.6309-0.6914,5.0117-2.0732,7.1406c-1.3828,2.1299-3.3613,3.8125-5.9365,5.0498 C140.6875,66.3896,137.5938,67.0078,133.9815,67.0078z"/> <path d="M163.5137,42.8271v23.3447h-4.3145v-49.833h4.3145v18.3613h0.4346c0.8691-1.9395,2.2178-3.4893,4.0469-4.6484 c1.8281-1.1592,4.1582-1.7393,6.9902-1.7393c2.5186,0,4.7373,0.5186,6.6553,1.5547c1.917,1.0371,3.417,2.5703,4.498,4.5986 c1.0811,2.0293,1.6221,4.5381,1.6221,7.5254v24.1807h-4.3477V42.2588c0-3.0986-0.8643-5.54-2.5918-7.3242 c-1.7285-1.7832-4.0527-2.6758-6.9736-2.6758c-1.9844,0-3.751,0.4297-5.3008,1.2881s-2.7764,2.0732-3.6787,3.6455 C163.9649,38.7637,163.5137,40.6426,163.5137,42.8271z"/> <path d="M207.4932,67.0078c-2.252,0-4.3145-0.4404-6.1875-1.3213c-1.873-0.8799-3.3613-2.1621-4.4648-3.8457 s-1.6553-3.7295-1.6553-6.1377c0-1.8496,0.3457-3.3994,1.0371-4.6484c0.6904-1.248,1.6826-2.2793,2.9756-3.0938 c1.293-0.8135,2.8145-1.46,4.5664-1.9395c1.75-0.4795,3.6836-0.8418,5.8027-1.0869c2.0957-0.2676,3.8672-0.4961,5.3164-0.6855 s2.5547-0.4961,3.3125-0.9199c0.7578-0.4229,1.1367-1.1035,1.1367-2.04v-0.8691c0-2.5645-0.7578-4.5771-2.2734-6.0371 c-1.5176-1.46-3.6914-2.1904-6.5234-2.1904c-2.6973,0-4.8945,0.5908-6.5879,1.7725c-1.6953,1.1816-2.877,2.5752-3.5449,4.1807 l-4.1475-1.5049c0.8467-2.0293,2.0186-3.6572,3.5107-4.8838c1.4941-1.2256,3.166-2.1123,5.0176-2.6582 c1.8516-0.5469,3.7227-0.8193,5.6191-0.8193c1.4258,0,2.9102,0.1895,4.4473,0.5684c1.5391,0.3789,2.9766,1.0254,4.3145,1.9395 c1.3379,0.915,2.4258,2.1904,3.2617,3.8301c0.8359,1.6387,1.2539,3.707,1.2539,6.2031v25.3516h-4.3477V60.252h-0.2676 c-0.4902,1.0928-1.25,2.1572-2.2734,3.1943c-1.0273,1.0361-2.3086,1.8896-3.8477,2.5586 C211.4072,66.6738,209.5889,67.0078,207.4932,67.0078z M208.0947,63.0615c2.2969,0,4.2871-0.5068,5.9707-1.5215 s2.9824-2.3799,3.8965-4.0977c0.9141-1.7168,1.3711-3.5889,1.3711-5.6182v-5.3848c-0.334,0.3125-0.875,0.5908-1.623,0.8359 c-0.7461,0.2461-1.6035,0.458-2.5742,0.6357c-0.9707,0.1787-1.9512,0.334-2.9434,0.4678s-1.8672,0.2461-2.625,0.335 c-2.0957,0.2676-3.8965,0.6797-5.4023,1.2373c-1.5039,0.5576-2.6523,1.3154-3.4434,2.2744 c-0.793,0.959-1.1875,2.1963-1.1875,3.7119c0,2.2529,0.8066,4.0029,2.4238,5.251 C203.5752,62.4375,205.6201,63.0615,208.0947,63.0615z"/> <path d="M246.3897,66.9746c-3.0557,0-5.7363-0.8076-8.0439-2.4248c-2.3076-1.6162-4.1025-3.8848-5.3848-6.8057 s-1.9229-6.3096-1.9229-10.167c0-3.835,0.6465-7.2021,1.9395-10.1006s3.0938-5.1562,5.4014-6.7725 c2.3086-1.6172,4.9893-2.4248,8.0439-2.4248c2.2959,0,4.1973,0.4062,5.7021,1.2207c1.5049,0.8135,2.7207,1.8115,3.6455,2.9932 c0.9248,1.1816,1.6338,2.3301,2.124,3.4443h0.3682V16.3389h4.3145v49.833h-4.1807v-6.957h-0.502 c-0.4902,1.1377-1.2041,2.3086-2.1406,3.5117c-0.9365,1.2041-2.1631,2.2139-3.6787,3.0273 C250.5586,66.5674,248.6641,66.9746,246.3897,66.9746z M246.8906,63.0283c2.4307,0,4.4932-0.6689,6.1875-2.0068 s2.9932-3.1719,3.8965-5.502c0.9033-2.3291,1.3545-4.9883,1.3545-7.9766c0-3.0098-0.4463-5.6631-1.3379-7.96 c-0.8916-2.2959-2.1904-4.0967-3.8965-5.4014c-1.7051-1.3037-3.7734-1.9561-6.2041-1.9561c-2.4746,0-4.5703,0.6807-6.2871,2.04 c-1.7168,1.3604-3.0156,3.1943-3.8965,5.502s-1.3213,4.8994-1.3213,7.7754s0.4463,5.4854,1.3379,7.8262 s2.1904,4.2031,3.8965,5.585C242.3262,62.3369,244.416,63.0283,246.8906,63.0283z"/> <path d="M286.9912,66.9746c-3.4775,0-6.499-0.8193-9.0635-2.458s-4.5371-3.9072-5.9199-6.8066 c-1.3828-2.8975-2.0732-6.2314-2.0732-9.999c0-3.7686,0.6855-7.1123,2.0566-10.0342c1.3711-2.9209,3.2832-5.2168,5.7363-6.8896 c2.4521-1.6719,5.2949-2.5078,8.5283-2.5078c2.0068,0,3.957,0.373,5.8525,1.1201s3.6006,1.8789,5.1172,3.3945 c1.5166,1.5166,2.709,3.4395,3.5791,5.7695c0.8691,2.3301,1.3037,5.1006,1.3037,8.3105v1.9404h-29.1973V45.001h26.8564 l-1.9736,1.4717c0-2.7197-0.4629-5.1504-1.3877-7.291c-0.9258-2.1406-2.2461-3.834-3.9629-5.083 c-1.7178-1.249-3.7793-1.873-6.1875-1.873c-2.3857,0-4.4814,0.6299-6.2881,1.8896c-1.8057,1.2598-3.2051,2.9316-4.1973,5.0166 s-1.4883,4.3643-1.4883,6.8398v2.2402c0,2.9883,0.5186,5.5908,1.5557,7.8096c1.0361,2.2188,2.5078,3.9414,4.4141,5.167 c1.9072,1.2266,4.1533,1.8398,6.7393,1.8398c1.7617,0,3.3115-0.2793,4.6494-0.8359c1.3379-0.5576,2.4629-1.3096,3.3779-2.2578 c0.9141-0.9473,1.6055-1.9785,2.0732-3.0938l4.1143,1.3711c-0.5801,1.5605-1.5107,3.0049-2.793,4.3311 c-1.2822,1.3271-2.8877,2.3975-4.8164,3.2109S289.4668,66.9746,286.9912,66.9746z"/> <path d="M324.6514,28.7803v3.7793h-18.3613v-3.7793H324.6514z M312.043,66.1719V23.3291c0-2.0283,0.4678-3.7295,1.4043-5.1006 s2.1572-2.4131,3.6621-3.127c1.5049-0.7129,3.0938-1.0703,4.7666-1.0703c1.1582,0,2.1172,0.0947,2.876,0.2842 c0.7578,0.1895,1.3486,0.3848,1.7725,0.5859l-1.2705,3.7783c-0.335-0.1328-0.7314-0.2617-1.1875-0.3838 c-0.457-0.123-1.0537-0.1846-1.7891-0.1846c-1.873,0-3.334,0.5352-4.3818,1.6055s-1.5723,2.5869-1.5723,4.5488v41.9062H312.043z" /> <path d="M344.1494,66.9746c-3.2334,0-6.0869-0.8193-8.5615-2.458c-2.4756-1.6387-4.4102-3.9131-5.8027-6.8232 c-1.3945-2.9092-2.0908-6.248-2.0908-10.0166c0-3.834,0.6963-7.207,2.0908-10.1172c1.3926-2.9092,3.3271-5.1836,5.8027-6.8223 c2.4746-1.6387,5.3281-2.458,8.5615-2.458c3.2324,0,6.0811,0.8193,8.5449,2.458s4.3984,3.9131,5.8027,6.8223 c1.4053,2.9102,2.1074,6.2832,2.1074,10.1172c0,3.7686-0.6973,7.1074-2.0908,10.0166c-1.3936,2.9102-3.3271,5.1846-5.8027,6.8232 C350.2364,66.1553,347.3819,66.9746,344.1494,66.9746z M344.1494,63.0283c2.6084,0,4.8105-0.6973,6.6055-2.0908 c1.7939-1.3926,3.1602-3.2607,4.0967-5.6016c0.9365-2.3418,1.4053-4.8945,1.4053-7.6592c0-2.8096-0.4688-5.3848-1.4053-7.7256 s-2.3076-4.2139-4.1133-5.6191c-1.8066-1.4043-4.0029-2.1064-6.5889-2.1064c-2.5869,0-4.7773,0.708-6.5723,2.124 s-3.166,3.2891-4.1133,5.6182c-0.9482,2.3301-1.4219,4.8994-1.4219,7.709c0,2.7646,0.4688,5.3174,1.4053,7.6592 c0.9365,2.3408,2.3076,4.209,4.1133,5.6016C339.3672,62.3311,341.5625,63.0283,344.1494,63.0283z"/> <path d="M367.9619,66.1719V28.7803h4.1807v5.7861h0.335c0.7578-1.8945,2.0674-3.416,3.9297-4.5654 c1.8613-1.1475,3.9629-1.7217,6.3047-1.7217c0.3564,0,0.752,0,1.1865,0c0.4355,0,0.7979,0.0107,1.0879,0.0332v4.3809 c-0.1787-0.0215-0.5137-0.0605-1.0039-0.1172c-0.4902-0.0547-1.0371-0.083-1.6387-0.083c-1.918,0-3.6406,0.4131-5.167,1.2373 c-1.5273,0.8252-2.7266,1.9561-3.5957,3.3945s-1.3047,3.083-1.3047,4.9336v24.1133H367.9619z"/> <path d="M390.2364,66.1719V28.7803h4.1807v5.7861h0.4355c0.7354-1.9395,1.9785-3.4668,3.7285-4.582 c1.75-1.1143,3.8516-1.6719,6.3047-1.6719c2.5635,0,4.6709,0.6074,6.3213,1.8223c1.6494,1.2158,2.8867,2.8711,3.7119,4.9668h0.335 c0.8467-2.0508,2.2236-3.6953,4.1299-4.9326c1.9062-1.2383,4.209-1.8564,6.9062-1.8564c3.4785,0,6.2324,1.0928,8.2617,3.2773 c2.0283,2.1855,3.043,5.3633,3.043,9.5322v25.0498h-4.3477V41.1221c0-2.9434-0.7529-5.1562-2.2578-6.6387 c-1.5049-1.4834-3.4951-2.2246-5.9697-2.2246c-2.8545,0-5.0498,0.8867-6.5889,2.6592c-1.5381,1.7725-2.3076,3.9961-2.3076,6.6719 v24.582h-4.4482V40.7207c0-2.5195-0.7021-4.5596-2.1064-6.1211c-1.4053-1.5596-3.3896-2.3408-5.9531-2.3408 c-1.7178,0-3.2617,0.4297-4.6328,1.2881s-2.4531,2.0342-3.2441,3.5283c-0.792,1.4941-1.1875,3.2217-1.1875,5.1836v23.9131 H390.2364z"/> </g> <g> <rect width="0.9586" height="81.0391"/> <rect x="5.8021" width="1.305" height="81.0391"/> <rect x="11.6038" width="1.6532" height="81.0391"/> <rect x="17.4041" width="2.0043" height="81.0391"/> <rect x="23.2039" width="2.3562" height="81.0391"/> <rect x="29.0023" width="2.711" height="81.0391"/> <rect x="34.7984" width="3.0696" height="81.0391"/> <rect x="40.594" width="3.43" height="81.0391"/> <rect x="46.3872" width="3.7951" height="81.0391"/> <rect x="52.1786" width="4.1639" height="81.0391"/> <rect x="57.9667" width="4.5393" height="81.0391"/> <rect x="63.7501" width="4.9231" height="81.0391"/> <polygon points="76.9921,0 75.2875,0 69.528,0 69.528,81.0391 75.2875,81.0391 76.9921,81.0391 81.0391,81.0391 81.0391,0 "/> </g> </g> <g> <g> <path d="M197.5244-167.4508c3.2173,0,3.2226-5,0-5C194.3071-172.4508,194.3018-167.4508,197.5244-167.4508L197.5244-167.4508z"/> </g> </g></symbol></svg>
+
+<!-- ===================== HEADER ===================== -->
+<header class="hdr" id="hdr">
+  <a class="hdr__logo" href="#top" aria-label="Shadeform — domů"><svg viewBox="0 0 437.5948 81.0391" role="img"><use href="#logo"/></svg></a>
+  <nav class="nav" aria-label="Hlavní navigace">
+    <div class="nav__item">
+      <a class="nav__link body" href="#/zaluzie">Žaluzie <svg class="ico"><use href="#i-expand-more"/></svg></a>
+      <div class="mega">
+        <div class="mega__list">
+          <a href="#/zaluzie/venkovni" data-prev="0-0">Venkovní žaluzie <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zaluzie/viva" data-prev="0-1">Samonosné žaluzie VIVA <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zaluzie/slunolamy" data-prev="0-2">Slunolamy <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zaluzie/plise" data-prev="0-3">Skládané žaluzie plisé <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zaluzie/bambusove" data-prev="0-4">Bambusové žaluzie <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zaluzie/drevene" data-prev="0-5">Horizontální dřevěné <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zaluzie/vertikalni" data-prev="0-6">Vertikální lamelové <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+        </div>
+        <div class="mega__prev">
+          <img data-prev="0-0" src="assets/img/cat/78_Venkovni-zaluzie-obr.jpeg" alt="Venkovní žaluzie" loading="lazy">
+          <img data-prev="0-1" src="assets/img/cat/3509_Samonosna-zaluzie-VIVA-obr.jpg" alt="Samonosné žaluzie VIVA" loading="lazy">
+          <img data-prev="0-2" src="assets/img/cat/79_C00E5157-B56B-4048-A931-F90175142C73.jpeg" alt="Slunolamy" loading="lazy">
+          <img data-prev="0-3" src="assets/img/cat/80_IMG-1248.jpeg" alt="Skládané žaluzie plisé" loading="lazy">
+          <img data-prev="0-4" src="assets/img/cat/81_bambus-25-mm2.jpeg" alt="Bambusové žaluzie" loading="lazy">
+          <img data-prev="0-5" src="assets/img/cat/82_zaluzie-drevene.jpg" alt="Horizontální dřevěné" loading="lazy">
+          <img data-prev="0-6" src="assets/img/cat/83_sd-0144-210x210.jpg" alt="Vertikální lamelové" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <div class="nav__item">
+      <a class="nav__link body" href="#/rolety">Rolety <svg class="ico"><use href="#i-expand-more"/></svg></a>
+      <div class="mega">
+        <div class="mega__list">
+          <a href="#/rolety/predokenni-hlinikove" data-prev="1-0">Předokenní hliníkové <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/rolety/screenove" data-prev="1-1">Screenové rolety <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/rolety/predokenni-drevene" data-prev="1-2">Předokenní dřevěné <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/rolety/latkove" data-prev="1-3">Látkové rolety <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/rolety/rimske" data-prev="1-4">Římské rolety <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/rolety/twintex" data-prev="1-5">Rolety den a noc <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/rolety/panelove" data-prev="1-6">Panelové posuvné stěny <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+        </div>
+        <div class="mega__prev">
+          <img data-prev="1-0" src="assets/img/cat/70_Rolety-4.jpeg" alt="Předokenní hliníkové" loading="lazy">
+          <img data-prev="1-1" src="assets/img/cat/68_Rolety-3.jpg" alt="Screenové rolety" loading="lazy">
+          <img data-prev="1-2" src="assets/img/cat/71_Rolety-predokenni-drevene.jpeg" alt="Předokenní dřevěné" loading="lazy">
+          <img data-prev="1-3" src="assets/img/cat/72_rolety-6.jpeg" alt="Látkové rolety" loading="lazy">
+          <img data-prev="1-4" src="assets/img/cat/73_rolety-7.jpeg" alt="Římské rolety" loading="lazy">
+          <img data-prev="1-5" src="assets/img/cat/74_Rolety-twintex-den-a-noc.jpeg" alt="Rolety den a noc" loading="lazy">
+          <img data-prev="1-6" src="assets/img/cat/76_rolety-8.jpg" alt="Panelové posuvné stěny" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <div class="nav__item">
+      <a class="nav__link body" href="#/markyzy">Markýzy <svg class="ico"><use href="#i-expand-more"/></svg></a>
+      <div class="mega">
+        <div class="mega__list">
+          <a href="#/markyzy/kazetove" data-prev="2-0">Kazetové markýzy <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/markyzy/polokazetove" data-prev="2-1">Polokazetové markýzy <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/markyzy/bez-krytu" data-prev="2-2">Markýzy bez krytu <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/markyzy/specialni" data-prev="2-3">Speciální markýzy <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/markyzy/potisk" data-prev="2-4">Potisk markýz <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+        </div>
+        <div class="mega__prev">
+          <img data-prev="2-0" src="assets/img/cat/27_1.jpeg" alt="Kazetové markýzy" loading="lazy">
+          <img data-prev="2-1" src="assets/img/cat/29_Polokazetove-markyzy-realizace-5.jpg" alt="Polokazetové markýzy" loading="lazy">
+          <img data-prev="2-2" src="assets/img/cat/28_2.jpg" alt="Markýzy bez krytu" loading="lazy">
+          <img data-prev="2-3" src="assets/img/cat/30_Specialni-markyzy-mobile-carousel-2.jpg" alt="Speciální markýzy" loading="lazy">
+          <img data-prev="2-4" src="assets/img/cat/31_3.jpg" alt="Potisk markýz" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <div class="nav__item">
+      <a class="nav__link body" href="#/pergoly">Pergoly <svg class="ico"><use href="#i-expand-more"/></svg></a>
+      <div class="mega">
+        <div class="mega__list">
+          <a href="#/pergoly/pevna-strecha" data-prev="3-0">S pevnou střechou <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/pergoly/bioklimaticke" data-prev="3-1">Bioklimatické pergoly <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/pergoly/posuvna-strecha" data-prev="3-2">S posuvnou střechou <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/pergoly/stresni-roleta" data-prev="3-3">Se střešní roletou <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/pergoly/carport" data-prev="3-4">Přístřešek CARPORT <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+        </div>
+        <div class="mega__prev">
+          <img data-prev="3-0" src="assets/img/cat/2976_Hlinikove-pergoly-s-pevnou-strechou-konstrukce-Ultraline.jpeg" alt="S pevnou střechou" loading="lazy">
+          <img data-prev="3-1" src="assets/img/cat/2944_Bioklimaticka-pergola-Artosi-Logo.jpg" alt="Bioklimatické pergoly" loading="lazy">
+          <img data-prev="3-2" src="assets/img/cat/32_Pergola-s-baldachynem-pergola-elegancy.jpg" alt="S posuvnou střechou" loading="lazy">
+          <img data-prev="3-3" src="assets/img/cat/2912_Pergola-se-stresni-roletou-2.jpg" alt="Se střešní roletou" loading="lazy">
+          <img data-prev="3-4" src="assets/img/cat/3583_Carport-pristresek-pro-auto-uvod.jpeg" alt="Přístřešek CARPORT" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <div class="nav__item">
+      <a class="nav__link body" href="#/zimni-zahrady">Zimní zahrady <svg class="ico"><use href="#i-expand-more"/></svg></a>
+      <div class="mega">
+        <div class="mega__list">
+          <a href="#/zimni-zahrady/trendline" data-prev="4-0">Zimní zahrada Trendline <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zimni-zahrady/topline" data-prev="4-1">Zimní zahrada Topline <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zimni-zahrady/ultraline" data-prev="4-2">Zimní zahrada Ultraline <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zimni-zahrady/bezramove" data-prev="4-3">Posuvné bezrámové zasklení <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/zimni-zahrady/ramove" data-prev="4-4">Posuvné rámové zasklení <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+        </div>
+        <div class="mega__prev">
+          <img data-prev="4-0" src="assets/img/cat/2905_Zimni-zahrada-Trendline-obr.JPG" alt="Zimní zahrada Trendline" loading="lazy">
+          <img data-prev="4-1" src="assets/img/cat/3061_Zimni-zahrada-Topline-obr.jpg" alt="Zimní zahrada Topline" loading="lazy">
+          <img data-prev="4-2" src="assets/img/cat/2908_Zimni-zahrada-Ultraline-classic-obr.jpg" alt="Zimní zahrada Ultraline" loading="lazy">
+          <img data-prev="4-3" src="assets/img/cat/2906_Bezramove-zaskleni-obr.jpg" alt="Posuvné bezrámové zasklení" loading="lazy">
+          <img data-prev="4-4" src="assets/img/cat/2907_Ram-posuv.jpg" alt="Posuvné rámové zasklení" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <div class="nav__item">
+      <a class="nav__link body" href="#/ostatni">Ostatní <svg class="ico"><use href="#i-expand-more"/></svg></a>
+      <div class="mega">
+        <div class="mega__list">
+          <a href="#/ostatni/somfy" data-prev="5-0">Chytrá domácnost Somfy <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/ostatni/topidla" data-prev="5-1">Terasová plynová topidla <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/ostatni/grily" data-prev="5-2">Grily Rösle <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/ostatni/site" data-prev="5-3">Sítě proti hmyzu <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/ostatni/zavesy" data-prev="5-4">Zatemňovací závěsy <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/ostatni/baldachyny" data-prev="5-5">Baldachýny <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          <a href="#/ostatni/zaclony" data-prev="5-6">Záclony <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+        </div>
+        <div class="mega__prev">
+          <img data-prev="5-0" src="assets/img/cat/2869_TaHoma-switch-chytra-domacnost-uvod.JPG" alt="Chytrá domácnost Somfy" loading="lazy">
+          <img data-prev="5-1" src="assets/img/cat/3459_Plynove-designove-topidlo.jpg" alt="Terasová plynová topidla" loading="lazy">
+          <img data-prev="5-2" src="assets/img/cat/3473_Gril-Rosle-Videro-G6-Vario-Plus-obr1.jpeg" alt="Grily Rösle" loading="lazy">
+          <img data-prev="5-3" src="assets/img/cat/38_site-proti-hmyzu-do-okna.jpeg" alt="Sítě proti hmyzu" loading="lazy">
+          <img data-prev="5-4" src="assets/img/cat/33_zaclony-zatemnovaci.jpeg" alt="Zatemňovací závěsy" loading="lazy">
+          <img data-prev="5-5" src="assets/img/cat/3150_68501E93-B9A0-4713-B94C-5FEB137780C4.jpeg" alt="Baldachýny" loading="lazy">
+          <img data-prev="5-6" src="assets/img/cat/39_1-255-zaclona14.jpg" alt="Záclony" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <a class="nav__link body" href="#/o-shadeform">O Shadeform</a>
+    <a class="nav__link body" href="#/blog">Blog</a>
+    <a class="nav__link body" href="#/kontakty">Kontakty</a>
+  </nav>
+  <a class="btn btn--fill" href="#poptavka">Poptat řešení <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+  <button class="burger" id="burger" type="button" aria-label="Otevřít menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="top" data-hdr="photo">
+  <div class="hero__slide is-on" data-ink="light" data-nav="light" data-cap="Dokonale rovná pergola" data-ttl="Flatline">
+    <img src="assets/img/hero/3898_Hlinikova-pergola-Flatline-s-bezpecnostnim-sklem-RAL-7016-desktop.jpg" alt="Hliníková pergola Flatline s bezpečnostním sklem">
+  </div>
+  <div class="hero__slide" data-ink="light" data-nav="light" data-cap="Ochrana a elegance nejen pro váš vůz" data-ttl="Carport">
+    <img src="assets/img/hero/3722_Carport-pristresek-pro-auto-desktop.jpeg" alt="Carport — přístřešek pro auto" loading="lazy">
+  </div>
+  <div class="hero__slide" data-ink="light" data-nav="light" data-cap="Čistý vzhled, kvalitní zpracování a atraktivní cena" data-ttl="Pergola Trendline">
+    <img src="assets/img/hero/3506_Trendline-pergola-RAL7016-desktop.jpg" alt="Hliníková pergola Trendline" loading="lazy">
+  </div>
+  <div class="hero__slide" data-ink="light" data-nav="light" data-cap="Místo, které nemusíte opustit na konci sezóny" data-ttl="Zahrada Topline">
+    <img src="assets/img/hero/3149_Topline-zimni-zahrada-RAL7016-desktop.jpg" alt="Zimní zahrada Topline" loading="lazy">
+  </div>
+  <div class="hero__slide" data-ink="light" data-nav="light" data-cap="Elektrické venkovní žaluzie s plynulou regulací světla" data-ttl="Venkovní žaluzie">
+    <img src="assets/img/hero/2901_Venkovni-zaluzie-desktop.jpeg" alt="Venkovní žaluzie" loading="lazy">
+  </div>
+
+  <div class="hero__copy">
+    <p class="body hero__cap" id="heroCap"></p>
+    <h1 class="display hero__ttl" id="heroTtl"></h1>
+  </div>
+  <div class="hero__dots" id="heroDots"></div>
+</section>
+
+<!-- ===================== PRODUKTY ===================== -->
+<section class="sec" id="produkty" data-hdr="surface">
+ <div class="sec__in">
+  <div class="sec__head">
+    <div class="sec__head-l">
+      <span class="subtitle sec__eyebrow">Co nabízíme</span>
+      <h2 class="title">Stínění, které sedí<br>vašemu domu</h2>
+    </div>
+    <div class="sec__head-r">
+      <p class="body muted">Šest kategorií, více než třicet variant. Najeďte na kategorii a rozbalí se konkrétní řešení — od venkovních žaluzií po bezrámové zasklení zimní zahrady.</p>
+    </div>
+  </div>
+
+  <div class="prod" id="prod">
+    <div class="prod__row">
+      <article class="prod__item" style="--g:1.45">
+        <img src="assets/img/hero/2901_Venkovni-zaluzie-desktop.jpeg" alt="Venkovní žaluzie">
+        <div class="prod__body">
+          <div class="prod__top">
+            <span class="caption prod__n">01</span>
+            <a class="prod__arrow" href="#/zaluzie" aria-label="Žaluzie"><svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          </div>
+          <div class="prod__foot">
+            <div class="prod__l">
+              <h3 class="prod__ttl">Žaluzie</h3>
+              <div class="prod__tags">
+                <a href="#/zaluzie/venkovni">Venkovní</a><a href="#/zaluzie/viva">VIVA</a><a href="#/zaluzie/plise">Plisé</a><a href="#/zaluzie/drevene">Dřevěné</a>
+              </div>
+            </div>
+            <p class="body prod__r">Ochraňují proti slunečním paprskům, regulují světlo v místnosti a chrání vaše soukromí.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="prod__item" style="--g:1">
+        <img src="assets/img/cat/70_Rolety-4.jpeg" alt="Předokenní rolety" loading="lazy">
+        <div class="prod__body">
+          <div class="prod__top">
+            <span class="caption prod__n">02</span>
+            <a class="prod__arrow" href="#/rolety" aria-label="Rolety"><svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          </div>
+          <div class="prod__foot">
+            <div class="prod__l">
+              <h3 class="prod__ttl">Rolety</h3>
+              <div class="prod__tags">
+                <a href="#/rolety/predokenni-hlinikove">Předokenní</a><a href="#/rolety/screenove">Screenové</a><a href="#/rolety/rimske">Římské</a>
+              </div>
+            </div>
+            <p class="body prod__r">Exteriérové dřevěné či hliníkové s lamelami. Interiérové překvapí škálou látek a barev.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="prod__item" style="--g:1.15">
+        <img src="assets/img/cat/29_Polokazetove-markyzy-realizace-5.jpg" alt="Polokazetová markýza" loading="lazy">
+        <div class="prod__body">
+          <div class="prod__top">
+            <span class="caption prod__n">03</span>
+            <a class="prod__arrow" href="#/markyzy" aria-label="Markýzy"><svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          </div>
+          <div class="prod__foot">
+            <div class="prod__l">
+              <h3 class="prod__ttl">Markýzy</h3>
+              <div class="prod__tags">
+                <a href="#/markyzy/kazetove">Kazetové</a><a href="#/markyzy/polokazetove">Polokazetové</a><a href="#/markyzy/potisk">Potisk</a>
+              </div>
+            </div>
+            <p class="body prod__r">Zastíní terasu jednoduše a bez závratných investic.</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="prod__row">
+      <article class="prod__item" style="--g:1.1">
+        <img src="assets/img/hero/3506_Trendline-pergola-RAL7016-desktop.jpg" alt="Hliníková pergola Trendline" loading="lazy">
+        <div class="prod__body">
+          <div class="prod__top">
+            <span class="caption prod__n">04</span>
+            <a class="prod__arrow" href="#/pergoly" aria-label="Pergoly"><svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          </div>
+          <div class="prod__foot">
+            <div class="prod__l">
+              <h3 class="prod__ttl">Pergoly</h3>
+              <div class="prod__tags">
+                <a href="#/pergoly/bioklimaticke">Bioklimatické</a><a href="#/pergoly/pevna-strecha">Pevná střecha</a><a href="#/pergoly/carport">Carport</a>
+              </div>
+            </div>
+            <p class="body prod__r">Hliník místo dřeva — žádné natírání, jen terasa, kterou využijete naplno.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="prod__item" style="--g:1.4">
+        <img src="assets/img/hero/3148_Zimni-zahrada-Ultraline-RAL7016-2-desktop.jpg" alt="Zimní zahrada Ultraline" loading="lazy">
+        <div class="prod__body">
+          <div class="prod__top">
+            <span class="caption prod__n">05</span>
+            <a class="prod__arrow" href="#/zimni-zahrady" aria-label="Zimní zahrady"><svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          </div>
+          <div class="prod__foot">
+            <div class="prod__l">
+              <h3 class="prod__ttl">Zimní zahrady</h3>
+              <div class="prod__tags">
+                <a href="#/zimni-zahrady/ultraline">Ultraline</a><a href="#/zimni-zahrady/topline">Topline</a><a href="#/zimni-zahrady/bezramove">Bezrámové zasklení</a>
+              </div>
+            </div>
+            <p class="body prod__r">Chrání před sluncem, ale nechají vás dívat se na hvězdy i sledovat kapky deště.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="prod__item" style="--g:1">
+        <img src="assets/img/cat/3473_Gril-Rosle-Videro-G6-Vario-Plus-obr1.jpeg" alt="Gril Rösle" loading="lazy">
+        <div class="prod__body">
+          <div class="prod__top">
+            <span class="caption prod__n">06</span>
+            <a class="prod__arrow" href="#/ostatni" aria-label="Ostatní"><svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+          </div>
+          <div class="prod__foot">
+            <div class="prod__l">
+              <h3 class="prod__ttl">Ostatní</h3>
+              <div class="prod__tags">
+                <a href="#/ostatni/somfy">Somfy</a><a href="#/ostatni/grily">Grily</a><a href="#/ostatni/topidla">Topidla</a><a href="#/ostatni/site">Sítě</a>
+              </div>
+            </div>
+            <p class="body prod__r">Grily, plynová topidla, světelné panely, sítě proti hmyzu a zatemňovací závěsy.</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== ČÍSLA ===================== -->
+<section class="sec sec--dark" id="cisla" data-hdr="dark">
+ <div class="sec__in">
+  <div class="sec__head">
+    <div class="sec__head-l">
+      <span class="subtitle sec__eyebrow">Shadeform v číslech</span>
+      <h2 class="title">Rodinná firma,<br>ne montážní parta</h2>
+    </div>
+    <div class="sec__head-r">
+      <p class="body muted">Vlastní výroba, vlastní technici, vlastní montážní týmy. Proto držíme termíny i po třiceti letech.</p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><p class="stat__n">34</p><p class="body stat__t">úspěšných let na trhu</p></div>
+    <div class="stat"><p class="stat__n">10 489</p><p class="body stat__t">spokojených zákazníků</p></div>
+    <div class="stat"><p class="stat__n">35</p><p class="body stat__t">variant stínění na výběr</p></div>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== EXTERIÉR / INTERIÉR ===================== -->
+<section class="sec sec--tint" id="stineni" data-hdr="tint">
+ <div class="sec__in">
+  <div class="split">
+    <article class="split__card">
+      <img src="assets/img/hero/3722_Carport-pristresek-pro-auto-desktop.jpeg" alt="Exteriérové stínění" loading="lazy">
+      <div class="split__body">
+        <div class="split__l">
+          <h3 class="title">Exteriérové<br>stínění</h3>
+          <p class="body">Zastaví teplo dřív, než se dostane do domu. Venkovní žaluzie, screenové rolety, markýzy, pergoly a přístřešky — vše s motorickým ovládáním Somfy.</p>
+        </div>
+        <div class="split__r"><a class="btn btn--onphoto" href="#/exterierove-stineni">Zobrazit <svg class="ico"><use href="#i-arrow-outward"/></svg></a></div>
+      </div>
+    </article>
+    <article class="split__card">
+      <img src="assets/img/cat/82_zaluzie-drevene.jpg" alt="Interiérové stínění" loading="lazy">
+      <div class="split__body">
+        <div class="split__l">
+          <h3 class="title">Interiérové<br>stínění</h3>
+          <p class="body">Ladí světlo i soukromí. Plisé, dřevěné a hliníkové žaluzie, látkové a římské rolety, zatemňovací závěsy a záclony ve stovkách látek a odstínů.</p>
+        </div>
+        <div class="split__r"><a class="btn btn--onphoto" href="#/interierove-stineni">Zobrazit <svg class="ico"><use href="#i-arrow-outward"/></svg></a></div>
+      </div>
+    </article>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== REALIZACE (stories) ===================== -->
+<section class="sec" id="realizace" data-hdr="surface">
+ <div class="sec__in">
+  <div class="sec__head">
+    <div class="sec__head-l">
+      <span class="subtitle sec__eyebrow">Naše realizace</span>
+      <h2 class="title">Postavené,<br>ne vyrenderované</h2>
+    </div>
+    <div class="sec__head-r tr">
+      <p class="body muted">Prohlédněte si fotografie našich realizací na Instagramu <span style="white-space:nowrap">@shadeform.cz</span>.</p>
+    </div>
+  </div>
+  <div class="stories__wrap">
+   <button class="stories__nav stories__nav--prev" id="stPrev" type="button" aria-label="Předchozí"><svg class="ico"><use href="#i-chevron-left"/></svg></button>
+   <button class="stories__nav stories__nav--next" id="stNext" type="button" aria-label="Další"><svg class="ico"><use href="#i-chevron-right"/></svg></button>
+   <div class="stories" id="stories">
+    <div class="story" data-i="0"><div class="story__ring"><img src="assets/img/work/3310_realizace1.jpg" alt=""></div><p class="subtitle story__t">Zimní zahrada Ultraline</p></div>
+    <div class="story" data-i="1"><div class="story__ring"><img src="assets/img/work/3311_realizace2.jpg" alt=""></div><p class="subtitle story__t">Bioklimatická pergola</p></div>
+    <div class="story" data-i="2"><div class="story__ring"><img src="assets/img/work/3312_realizace3.jpg" alt=""></div><p class="subtitle story__t">Elektrická markýza</p></div>
+    <div class="story" data-i="3"><div class="story__ring"><img src="assets/img/work/3313_realizace4.jpg" alt=""></div><p class="subtitle story__t">Interiérové stínění</p></div>
+    <div class="story" data-i="4"><div class="story__ring"><img src="assets/img/hero/3722_Carport-pristresek-pro-auto-desktop.jpeg" alt=""></div><p class="subtitle story__t">Carport</p></div>
+    <div class="story" data-i="5"><div class="story__ring"><img src="assets/img/hero/3149_Topline-zimni-zahrada-RAL7016-desktop.jpg" alt=""></div><p class="subtitle story__t">Zahrada Topline</p></div>
+    <div class="story" data-i="6"><div class="story__ring"><img src="assets/img/hero/3506_Trendline-pergola-RAL7016-desktop.jpg" alt=""></div><p class="subtitle story__t">Pergola Trendline</p></div>
+    <div class="story" data-i="7"><div class="story__ring"><img src="assets/img/hero/2901_Venkovni-zaluzie-desktop.jpeg" alt=""></div><p class="subtitle story__t">Venkovní žaluzie</p></div>
+    <div class="story" data-i="8"><div class="story__ring"><img src="assets/img/hero/3148_Zimni-zahrada-Ultraline-RAL7016-2-desktop.jpg" alt=""></div><p class="subtitle story__t">Ultraline bezrámová</p></div>
+    <div class="story" data-i="9"><div class="story__ring"><img src="assets/img/cat/29_Polokazetove-markyzy-realizace-5.jpg" alt=""></div><p class="subtitle story__t">Polokazetová markýza</p></div>
+    <div class="story" data-i="10"><div class="story__ring"><img src="assets/img/cat/2906_Bezramove-zaskleni-obr.jpg" alt=""></div><p class="subtitle story__t">Bezrámové zasklení</p></div>
+   </div>
+  </div>
+  <div class="stories__foot">
+    <a class="btn btn--line" href="#/instagram">Zobrazit více <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== RECENZE ===================== -->
+<section class="sec sec--dark" id="recenze" data-hdr="dark">
+ <div class="sec__in">
+  <div class="sec__head">
+    <div class="sec__head-l">
+      <span class="subtitle sec__eyebrow">Recenze</span>
+      <h2 class="title">Co říkají lidé,<br>kterým jsme stínili</h2>
+    </div>
+    <div class="sec__head-r tr">
+      <p class="body muted">Hodnocení z Google a z e-mailů, které nám zákazníci poslali po montáži.</p>
+    </div>
+  </div>
+  <div class="revs" id="revs">
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Miroslav Hess</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Firmu Shadeform jsme si s manželkou vybrali pro realizaci bioklimatické pergoly a jsme moc spokojeni. Od začátku až do konečné montáže bylo vše na jedničku s hvězdičkou. Tak profesionální přístup celého týmu se jen tak nevidí.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Bioklimatická pergola</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Lucie Šůchová</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Zimní zahradu si užíváme už 8 měsíců a jsme nadšení. Komunikace v rámci výběru a příprav, zaměření i montáž — to vše proběhlo vždy podle domluvy, s dodržením všech termínů.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Zimní zahrada</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Jaroslav Kuřátko</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Recenze píšu jen výjimečně, ale tentokrát musím. Záloha jen 50 %, termín odhadnutý na 60 dní — a pergolu vyrobili už za 30. Montéři přijeli přesně na čas, pečlivě chránili nářadí a pracovali s naprostou jistotou.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Bioklimatická pergola 5,4 × 3,5 m</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Petra Krátká</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Perfektní od první návštěvy showroomu až po realizaci. Lépe jsme vybrat nemohli. Maximálně doporučujeme! A DĚKUJEME!“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Showroom Praha</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Vladimír Puza</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Instalovali předokenní rolety na rodinném domě — 15 oken, z toho 11 s motorem. Provedli veškeré elektro přípravy včetně vysekání drážek a základního úklidu. Můžeme firmu jen doporučit.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Předokenní rolety</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Olga Kmochová</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Za týden přijeli terasu zaměřit a pak se jen čekalo na profily a sklo. Zaměstnanci dorazili na čas a byla radost se na ně dívat. Byli precizní, velmi sehraní, hned věděli co dělat.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Zasklení terasy</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Lucie Vyhnálková</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Instalovali nám do domu žaluzie, plisé a předokenní rolety. Skvělá komunikace, příznivé ceny, precizní montáž, záruční i pozáruční servis. TOP kvalita. Krásná práce!“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Žaluzie, plisé, rolety</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Jan Šafránek</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Přestože jsme přišli s jasnou představou, společnými silami jsme vybrali mnohem zajímavější řešení. Jednání probíhalo nadstandardně vstřícně, vždy v domluveném termínu.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Sezónní zimní zahrada 6 × 5 m</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev">
+      <div class="rev__head">
+        <span class="rev__ava"><svg class="ico"><use href="#i-person"/></svg></span>
+        <div>
+          <p class="body rev__name">Jiří Pechar</p>
+          <div class="rev__stars" data-stars></div>
+        </div>
+      </div>
+      <p class="body rev__txt">„Se společností Shadeform spolupracujeme již řadu let pro jejich výborné služby, komunikaci, ceny i následný servis. Opravdu jedna z nejlepších firem v oboru.“</p>
+      <button class="body rev__more" type="button">více</button>
+      <p class="caption rev__svc">Pechar s.r.o.</p>
+      <a class="btn btn--sm btn--ondark" href="#/recenze">Podívejte se na recenzi</a>
+    </article>
+    <article class="rev rev--cta">
+      <p class="title" style="font-size:clamp(20px,1.6vw,26px)">Všech<br>318 recenzí</p>
+      <a class="btn btn--ondark" href="#/recenze">Zobrazit více <svg class="ico"><use href="#i-arrow-forward"/></svg></a>
+    </article>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== NOVINKY ===================== -->
+<section class="sec" id="novinky" data-hdr="surface">
+ <div class="sec__in">
+  <div class="sec__head">
+    <div class="sec__head-l">
+      <span class="subtitle sec__eyebrow">Novinky</span>
+      <h2 class="title">Co je nového</h2>
+    </div>
+    <div class="sec__head-r tr">
+      <a class="btn btn--line" href="#/blog">Zobrazit vše <svg class="ico"><use href="#i-arrow-forward"/></svg></a>
+    </div>
+  </div>
+  <div class="news">
+    <a class="post" href="#/blog/artosi-zimni-sleva">
+      <p class="caption post__date">15. 12. 2025</p>
+      <h3 class="subtitle">Zimní sleva 10 % na program ARTOSI — jen do 28. února 2026</h3>
+      <p class="body">Připravili jsme výjimečnou zimní akci na celý program ARTOSI. Pokud přemýšlíte o nové bioklimatické pergole, stání pro auto nebo posuvné panelové stěně, teď je ten nejlepší čas.</p>
+      <span class="post__go body">Číst dál <svg class="ico"><use href="#i-arrow-outward"/></svg></span>
+    </a>
+    <a class="post" href="#/blog/dvoubarevne-lakovani">
+      <p class="caption post__date">12. 12. 2025</p>
+      <h3 class="subtitle">Dvoubarevné lakování lamel u pergoly ARTOSI</h3>
+      <p class="body">Rozšiřujeme nabídku pergol ARTOSI o možnost dvoubarevného lakování lamel. Inovace umožňuje lépe sladit vzhled pergoly s architekturou domu či zahrady.</p>
+      <span class="post__go body">Číst dál <svg class="ico"><use href="#i-arrow-outward"/></svg></span>
+    </a>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== SHOWROOM ===================== -->
+<section class="sec sec--tint" id="showroom" data-hdr="tint">
+ <div class="sec__in">
+  <div class="show">
+    <div class="show__l">
+      <span class="subtitle sec__eyebrow">Showroom Praha</span>
+      <h2 class="title" id="poptavka">Přijeďte si na to<br>sáhnout</h2>
+      <p class="body" style="margin-top:20px;max-width:42ch">Vzorky látek, funkční modely pergol i žaluzií a technik, který vám řekne, co dává smysl. Bez objednání.</p>
+      <div class="info body">
+        <p class="info__row"><svg class="ico"><use href="#i-location-on"/></svg><span>Náchodská 411/157<br>193 00 Praha 20 — Horní Počernice</span></p>
+        <p class="info__row"><svg class="ico"><use href="#i-schedule"/></svg><span>Po, St: 9:00–17:00 &nbsp;·&nbsp; Út, Čt: 10:00–18:00<br>Pá: 12:00–17:00</span></p>
+        <p class="info__row"><svg class="ico"><use href="#i-call"/></svg><a href="#/tel">+420 222 317 638</a></p>
+        <p class="info__row"><svg class="ico"><use href="#i-mail"/></svg><a href="#/mail">info@shadeform.cz</a></p>
+      </div>
+    </div>
+
+    <div class="show__r">
+      <form class="form" id="poptForm" novalidate>
+        <h3 class="subtitle">Poptávkový formulář</h3>
+        <div class="form__grid">
+          <div class="field field--full"><label for="f-name">Jméno a příjmení</label><input id="f-name" type="text" autocomplete="name"></div>
+          <div class="field"><label for="f-mail">E-mail *</label><input id="f-mail" type="email" autocomplete="email"></div>
+          <div class="field"><label for="f-tel">Telefon *</label><input id="f-tel" type="tel" autocomplete="tel"></div>
+          <div class="field field--full">
+            <label for="f-int">Mám zájem o</label>
+            <select id="f-int"><option>Konzultace</option><option>Žaluzie</option><option>Rolety</option><option>Markýzy</option><option>Pergoly</option><option>Zasklení</option><option>Zimní zahrady</option><option>Jiné</option></select>
+            <svg class="ico field__chev"><use href="#i-expand-more"/></svg>
+          </div>
+          <div class="field field--full"><label for="f-note">Poznámka</label><textarea id="f-note" rows="3"></textarea></div>
+        </div>
+        <button class="btn btn--fill" type="submit">Odeslat poptávku <svg class="ico"><use href="#i-arrow-outward"/></svg></button>
+        <p class="caption form__note">Demoverze — formulář nikam neodesílá.</p>
+      </form>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="foot" data-hdr="dark">
+ <div class="sec__in">
+  <div class="foot__top">
+    <div class="foot__brand">
+      <span class="hdr__logo"><svg viewBox="0 0 437.5948 81.0391" role="img" aria-label="Shadeform"><use href="#logo"/></svg></span>
+      <p class="body">Výrobce a dodavatel exteriérového i interiérového stínění. Žaluzie, rolety, markýzy, pergoly, zimní zahrady a bezrámové zasklení.</p>
+      <div class="somfy caption"><img src="assets/img/logo/logo-somfy.png" alt="Somfy"><span>Používáme elektrické motory a ovládání od Somfy</span></div>
+    </div>
+    <div class="foot__cols">
+      <div class="foot__col">
+        <h4 class="caption" style="letter-spacing:.12em;text-transform:uppercase">Produkty</h4>
+        <ul class="body"><li><a href="#/zaluzie">Žaluzie</a></li><li><a href="#/rolety">Rolety</a></li><li><a href="#/markyzy">Markýzy</a></li><li><a href="#/pergoly">Pergoly</a></li><li><a href="#/zimni-zahrady">Zimní zahrady</a></li><li><a href="#/ostatni">Ostatní</a></li></ul>
+      </div>
+      <div class="foot__col">
+        <h4 class="caption" style="letter-spacing:.12em;text-transform:uppercase">Firma</h4>
+        <ul class="body"><li><a href="#/o-shadeform">O Shadeform</a></li><li><a href="#/kontakty">Kontakty</a></li><li><a href="#/blog">Blog</a></li><li><a href="#/reklamacni-rad">Reklamační řád</a></li><li><a href="#/ochrana-udaju">Ochrana osobních údajů</a></li></ul>
+      </div>
+      <div class="foot__col">
+        <h4 class="caption" style="letter-spacing:.12em;text-transform:uppercase">Showroom</h4>
+        <ul class="body"><li><a href="#/kontakty">Náchodská 411/157</a></li><li><a href="#/kontakty">193 00 Praha 20</a></li><li><a href="#/tel">+420 222 317 638</a></li><li><a href="#/mail">info@shadeform.cz</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot__bot caption">
+    <p>© 2010–2026 Shadeform s.r.o. — demoverze redesignu</p>
+    <span class="foot__credit">Navrženo <a href="https://aurifer.cz" target="_blank" rel="noopener noreferrer"><b>AURIFER</b></a></span>
+  </div>
+ </div>
+</footer>
+
+<!-- ===================== MOBILE MENU ===================== -->
+<div class="mm" id="mm" aria-hidden="true">
+  <div class="mm__top">
+    <span class="hdr__logo"><svg viewBox="0 0 437.5948 81.0391" role="img" aria-label="Shadeform"><use href="#logo"/></svg></span>
+    <button class="mm__close" id="mmClose" type="button" aria-label="Zavřít menu"><svg class="ico"><use href="#i-close"/></svg></button>
+  </div>
+  <nav id="mmNav" aria-label="Mobilní navigace"></nav>
+  <div class="mm__foot">
+    <a class="btn btn--fill" href="#poptavka">Poptat řešení <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+    <a class="btn btn--line" href="#/kontakty">Kontakty <svg class="ico"><use href="#i-arrow-forward"/></svg></a>
+  </div>
+</div>
+
+<!-- ===================== STORY VIEWER ===================== -->
+<div class="sv" id="sv" role="dialog" aria-modal="true" aria-label="Realizace">
+  <div class="sv__stage" id="svStage">
+    <div class="sv__hud">
+      <div class="sv__bars" id="svBars"></div>
+      <p class="body sv__cap" id="svCap"></p>
+    </div>
+    <button class="sv__arrow sv__arrow--prev" type="button" id="svPrev" aria-label="Předchozí"><svg class="ico"><use href="#i-chevron-left"/></svg></button>
+    <button class="sv__arrow sv__arrow--next" type="button" id="svNext" aria-label="Další"><svg class="ico"><use href="#i-chevron-right"/></svg></button>
+  </div>
+  <button class="sv__x" type="button" id="svX" aria-label="Zavřít"><svg class="ico"><use href="#i-close"/></svg></button>
+</div>
+
+<!-- ===================== DEMO LOCK ===================== -->
+<div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="lock__card">
+    <span class="lock__badge">Demo</span>
+    <p class="caption lock__crumb" id="lockCrumb"></p>
+    <h2 class="title" id="lockTitle">Tato stránka není v demoverzi dostupná</h2>
+    <p class="body">Demoverze obsahuje pouze homepage. Navigace, podkategorie i formulář jsou funkční, ale nikam nevedou — kompletní web připravíme v další fázi.</p>
+    <button class="btn btn--fill" type="button" id="lockBack"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-arrow-forward"/></svg> Zpět na homepage</button>
+  </div>
+</div>
+
+<!-- ===================== AURIFER (left) ===================== -->
+<aside class="plaque" id="plaque">
+  <span class="body">Navrženo <a href="https://aurifer.cz" target="_blank" rel="noopener noreferrer">AURIFER</a></span>
+  <button class="plaque__x" type="button" id="plaqueX" aria-label="Zavřít"><svg class="ico"><use href="#i-close"/></svg></button>
+</aside>
+
+<!-- ===================== CHAT (right) ===================== -->
+<div class="chat" id="chat">
+  <div class="chat__card">
+    <h4 class="subtitle">Nevíte si rady s výběrem?</h4>
+    <p class="body">Napište nám, co chcete zastínit — technik vám do druhého dne pošle návrh řešení i orientační cenu. Zdarma a nezávazně.</p>
+    <a class="btn btn--fill" href="#poptavka" id="chatCta">Poradíme zdarma <svg class="ico"><use href="#i-arrow-outward"/></svg></a>
+  </div>
+  <button class="chat__btn" type="button" id="chatBtn">
+    <svg class="ico ico--q"><use href="#i-forum"/></svg>
+    <svg class="ico ico--x"><use href="#i-close"/></svg>
+    <span class="body">Poradíme zdarma</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(s,r){ return (r||document).querySelector(s); };
+var $$ = function(s,r){ return [].slice.call((r||document).querySelectorAll(s)); };
+var cs = getComputedStyle(document.documentElement);
+var tok = function(n){ return cs.getPropertyValue(n).trim(); };
+
+/* ============================================================
+   HEADER — inherits the colours of whatever sits underneath it
+   ============================================================ */
+var hdr = $("#hdr");
+var THEMES = {
+  surface:[tok("--surface"), tok("--on-surface")],
+  tint:   [tok("--surface-container"), tok("--on-surface")],
+  brand:  [tok("--brand"), tok("--brand-ink")],
+  dark:   [tok("--surface-dark"), tok("--on-dark")]
+};
+var zones = $$("[data-hdr]");
+var heroNavInk = tok("--on-surface");
+function paintHeader(){
+  var line = hdr.offsetHeight * 0.8, z = zones[0];
+  for (var i=0;i<zones.length;i++) if (zones[i].getBoundingClientRect().top <= line) z = zones[i];
+  var kind = z.dataset.hdr;
+  if (kind === "photo") {
+    hdr.style.setProperty("--hdr-bg","transparent");
+    hdr.style.setProperty("--hdr-ink", heroNavInk);
+    hdr.dataset.theme = "photo";
+  } else {
+    hdr.style.setProperty("--hdr-bg", THEMES[kind][0]);
+    hdr.style.setProperty("--hdr-ink", THEMES[kind][1]);
+    hdr.dataset.theme = kind;
+  }
+}
+
+/* ============================================================
+   HERO CAROUSEL — cross-fade, no overlay, ink chosen per photo
+   ============================================================ */
+var hero = $(".hero"), slides = $$(".hero__slide"), dotsBox = $("#heroDots");
+var heroCap = $("#heroCap"), heroTtl = $("#heroTtl"), cur = 0, timer = null;
+var DUR = 6500;
+slides.forEach(function(_,i){
+  var d = document.createElement("button");
+  d.className = "hero__dot"; d.type = "button";
+  d.setAttribute("aria-label","Snímek " + (i+1));
+  d.innerHTML = "<i></i>";
+  d.addEventListener("click", function(){ go(i); });
+  dotsBox.appendChild(d);
+});
+var dots = $$(".hero__dot");
+function go(n){
+  cur = (n + slides.length) % slides.length;
+  var s = slides[cur];
+  slides.forEach(function(el,i){ el.classList.toggle("is-on", i === cur); });
+  hero.style.setProperty("--hero-ink", s.dataset.ink === "light" ? tok("--surface") : tok("--on-surface"));
+  heroNavInk = s.dataset.nav === "light" ? tok("--surface") : tok("--on-surface");
+  heroCap.textContent = s.dataset.cap;
+  heroTtl.textContent = s.dataset.ttl;
+  dots.forEach(function(d,i){
+    d.classList.remove("is-on");
+    if (i === cur) { void d.offsetWidth; d.classList.add("is-on"); }
+  });
+  paintHeader();
+  clearTimeout(timer);
+  timer = setTimeout(function(){ go(cur + 1); }, DUR);
+}
+document.documentElement.style.setProperty("--dur", DUR + "ms");
+go(0);
+requestAnimationFrame(function(){ hero.classList.add("is-ready"); });
+
+var tick = false;
+function onScroll(){ if(!tick){ tick = true; requestAnimationFrame(function(){ paintHeader(); tick = false; }); } }
+window.addEventListener("scroll", onScroll, {passive:true});
+window.addEventListener("resize", paintHeader);
+paintHeader();
+
+/* ============================================================
+   MEGA MENU — the photo of the hovered row slides out below
+   ============================================================ */
+$$(".mega").forEach(function(mega){
+  var imgs = $$("img", mega);
+  $$(".mega__list a", mega).forEach(function(a){
+    a.addEventListener("mouseenter", function(){
+      mega.classList.add("is-preview");
+      imgs.forEach(function(im){ im.classList.toggle("is-on", im.dataset.prev === a.dataset.prev); });
+    });
+  });
+  mega.addEventListener("mouseleave", function(){
+    mega.classList.remove("is-preview");
+    imgs.forEach(function(im){ im.classList.remove("is-on"); });
+  });
+});
+
+/* ============================================================
+   MOBILE MENU — built from the desktop nav
+   ============================================================ */
+var mm = $("#mm"), mmNav = $("#mmNav");
+$$(".nav > .nav__item").forEach(function(item){
+  var head = $(".nav__link", item), grp = document.createElement("div");
+  grp.className = "mm__grp";
+  var label = head.childNodes[0].textContent.trim();
+  var btn = document.createElement("button");
+  btn.type = "button";
+  btn.innerHTML = label + '<svg class="ico"><use href="#i-expand-more"/></svg>';
+  var box = document.createElement("div");
+  box.className = "mm__subs body";
+  var all = document.createElement("a");
+  all.href = head.getAttribute("href"); all.textContent = "Vše — " + label;
+  box.appendChild(all);
+  $$(".mega__list a", item).forEach(function(a){
+    var c = document.createElement("a");
+    c.href = a.getAttribute("href"); c.textContent = a.childNodes[0].textContent.trim();
+    box.appendChild(c);
+  });
+  btn.addEventListener("click", function(){ grp.classList.toggle("is-open"); });
+  grp.appendChild(btn); grp.appendChild(box); mmNav.appendChild(grp);
+});
+$$(".nav > a.nav__link").forEach(function(a){
+  var grp = document.createElement("div"); grp.className = "mm__grp";
+  var link = document.createElement("a");
+  link.href = a.getAttribute("href"); link.textContent = a.textContent.trim();
+  grp.appendChild(link); mmNav.appendChild(grp);
+});
+function closeMenu(){ mm.classList.remove("is-open"); mm.setAttribute("aria-hidden","true"); document.body.classList.remove("is-locked"); }
+$("#burger").addEventListener("click", function(){
+  mm.classList.add("is-open"); mm.setAttribute("aria-hidden","false"); document.body.classList.add("is-locked");
+});
+$("#mmClose").addEventListener("click", closeMenu);
+mm.addEventListener("click", function(e){ if (e.target.closest("a")) closeMenu(); });
+
+/* ============================================================
+   DEMO LOCK — every #/route is a page this demo does not build
+   ============================================================ */
+var lock = $("#lock"), crumb = $("#lockCrumb"), titles = {};
+$$('a[href^="#/"]').forEach(function(a){
+  var h = a.getAttribute("href");
+  if (!titles[h]) titles[h] = (a.childNodes[0].textContent || a.textContent).trim();
+});
+function labelFor(route){
+  if (titles[route]) {
+    var parent = "#/" + route.split("/")[1];
+    if (parent !== route && titles[parent]) return titles[parent] + " / " + titles[route];
+    return titles[route];
+  }
+  return route.replace("#/","").split("/").join(" / ");
+}
+function syncLock(){
+  if (location.hash.indexOf("#/") === 0) {
+    crumb.textContent = labelFor(location.hash);
+    lock.classList.add("is-open"); closeMenu(); document.body.classList.add("is-locked");
+  } else {
+    lock.classList.remove("is-open"); document.body.classList.remove("is-locked");
+  }
+}
+window.addEventListener("hashchange", syncLock);
+$("#lockBack").addEventListener("click", function(){
+  if (history.length > 1) history.back(); else location.hash = "";
+  setTimeout(function(){ if (location.hash.indexOf("#/") === 0) location.hash = ""; }, 60);
+});
+lock.addEventListener("click", function(e){ if (e.target === lock) $("#lockBack").click(); });
+syncLock();
+
+/* ============================================================
+   PRODUCT CARDS — tap to open where there is no hover
+   ============================================================ */
+if (window.matchMedia("(hover:none)").matches || window.innerWidth <= 900) {
+  $$(".prod__item").forEach(function(item){
+    item.addEventListener("click", function(e){
+      if (e.target.closest("a")) return;
+      var open = item.classList.contains("is-open");
+      $$(".prod__item").forEach(function(i){ i.classList.remove("is-open"); });
+      if (!open) item.classList.add("is-open");
+    });
+  });
+}
+
+/* ============================================================
+   REVIEW STARS
+   ============================================================ */
+$$("[data-stars]").forEach(function(el){
+  el.innerHTML = new Array(6).join('<svg class="ico"><use href="#i-star-fill"/></svg>');
+});
+
+/* ============================================================
+   STORIES — rail with arrows, viewer runs as a drum
+   ============================================================ */
+var rail = $("#stories"), stPrev = $("#stPrev"), stNext = $("#stNext");
+function railState(){
+  stPrev.disabled = rail.scrollLeft < 8;
+  stNext.disabled = rail.scrollLeft > rail.scrollWidth - rail.clientWidth - 8;
+}
+function railStep(dir){ rail.scrollBy({left: dir * rail.clientWidth * 0.7, behavior:"smooth"}); }
+stPrev.addEventListener("click", function(){ railStep(-1); });
+stNext.addEventListener("click", function(){ railStep(1); });
+rail.addEventListener("scroll", railState, {passive:true});
+window.addEventListener("resize", railState);
+railState();
+
+var stories = $$(".story").map(function(s){
+  return { src: $("img", s).getAttribute("src"), cap: $(".story__t", s).textContent };
+});
+var sv = $("#sv"), svStage = $("#svStage"), svCap = $("#svCap"), svBars = $("#svBars");
+var si = 0, sTimer = null;
+stories.forEach(function(st, i){
+  var c = document.createElement("div");
+  c.className = "sv__card";
+  c.innerHTML = '<img src="' + st.src + '" alt="">';
+  c.addEventListener("click", function(){ if (i !== si) showStory(i); });
+  svStage.insertBefore(c, $(".sv__hud"));   // keep DOM order == story order
+  var b = document.createElement("div"); b.className = "sv__bar"; b.innerHTML = "<i></i>";
+  svBars.appendChild(b);
+});
+var cards = $$(".sv__card"), bars = $$(".sv__bar");
+function layoutDrum(){
+  cards.forEach(function(c, i){
+    var o = i - si, a = Math.abs(o), dir = o < 0 ? -1 : 1;
+    var tx = a === 0 ? 0 : dir * (a === 1 ? 102 : 174);
+    var sc = a === 0 ? 1 : (a === 1 ? 0.70 : 0.52);
+    c.style.transform = "translateX(" + tx + "%) scale(" + sc + ")";
+    c.style.opacity = a > 2 ? 0 : 1;
+    c.style.pointerEvents = a > 2 ? "none" : "auto";
+    c.style.zIndex = 10 - a;
+    c.classList.toggle("is-side", a !== 0);
+  });
+}
+function showStory(n){
+  if (n < 0) { n = 0; }
+  if (n >= stories.length) { closeStories(); return; }
+  si = n;
+  svCap.textContent = stories[si].cap;
+  layoutDrum();
+  bars.forEach(function(b, i){
+    b.classList.remove("is-on","is-done");
+    if (i < si) b.classList.add("is-done");
+  });
+  void bars[si].offsetWidth;
+  bars[si].classList.add("is-on");
+  clearTimeout(sTimer);
+  sTimer = setTimeout(function(){ showStory(si + 1); }, 5000);
+}
+function openStories(n){ sv.classList.add("is-open"); document.body.classList.add("is-locked"); showStory(n); }
+function closeStories(){
+  sv.classList.remove("is-open"); document.body.classList.remove("is-locked");
+  clearTimeout(sTimer);
+  bars.forEach(function(b){ b.classList.remove("is-on","is-done"); });
+}
+$$(".story").forEach(function(s){ s.addEventListener("click", function(){ openStories(+s.dataset.i); }); });
+$("#svNext").addEventListener("click", function(){ showStory(si + 1); });
+$("#svPrev").addEventListener("click", function(){ showStory(si - 1); });
+$("#svX").addEventListener("click", closeStories);
+sv.addEventListener("click", function(e){ if (e.target === sv || e.target === svStage) closeStories(); });
+
+/* ---- review cards: reveal the full text, hide the link when it all fits ---- */
+$$(".rev__more").forEach(function(b){
+  var txt = $(".rev__txt", b.closest(".rev"));
+  if (txt.scrollHeight <= txt.clientHeight + 2) { b.style.display = "none"; return; }
+  b.addEventListener("click", function(){ b.closest(".rev").classList.add("is-full"); });
+});
+
+/* ============================================================
+   CHAT / PLAQUE / FORM
+   ============================================================ */
+var chat = $("#chat");
+$("#chatBtn").addEventListener("click", function(){ chat.classList.toggle("is-open"); });
+$("#chatCta").addEventListener("click", function(){ chat.classList.remove("is-open"); });
+$("#plaqueX").addEventListener("click", function(){ $("#plaque").classList.add("is-hidden"); });
+
+var toast = $("#toast"), tT;
+function say(m){
+  toast.textContent = m; toast.classList.add("is-open");
+  clearTimeout(tT); tT = setTimeout(function(){ toast.classList.remove("is-open"); }, 3200);
+}
+$("#poptForm").addEventListener("submit", function(e){
+  e.preventDefault(); say("Demoverze — formulář nikam neodesílá.");
+});
+$$('a[href="#/tel"],a[href="#/mail"]').forEach(function(a){
+  a.addEventListener("click", function(e){
+    e.preventDefault();
+    say(a.getAttribute("href") === "#/tel" ? "+420 222 317 638" : "info@shadeform.cz");
+  });
+});
+
+document.addEventListener("keydown", function(e){
+  if (e.key !== "Escape") return;
+  if (sv.classList.contains("is-open")) closeStories();
+  else if (lock.classList.contains("is-open")) $("#lockBack").click();
+  else if (mm.classList.contains("is-open")) closeMenu();
+  else if (chat.classList.contains("is-open")) chat.classList.remove("is-open");
+});
+})();
+</script>
+</body>
+</html>
